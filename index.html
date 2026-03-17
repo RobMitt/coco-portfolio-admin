@@ -5,700 +5,327 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coco Cadeaux — Portfolio Manager</title>
 <style>
-:root {
-  --navy: #2F3847;
-  --peach: #EBBA98;
-  --blush: #F1EBEB;
-  --gray-light: #F7F5F3;
-  --white: #FFFFFF;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Montserrat',system-ui,sans-serif; background:var(--gray-light); color:var(--navy); }
-a { color:var(--navy); }
+:root { --navy:#2F3847; --peach:#EBBA98; --blush:#F1EBEB; --gray-light:#F7F5F3; --white:#FFFFFF; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Montserrat',system-ui,sans-serif;background:var(--gray-light);color:var(--navy);}
 
-/* ── Layout ── */
-.topbar { background:var(--navy); color:var(--white); padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between; }
-.topbar h1 { font-size:1.1rem; font-weight:600; }
-.tabs { display:flex; gap:0; border-bottom:2px solid #e0ddd9; background:var(--white); padding:0 2rem; }
-.tab { padding:.85rem 1.5rem; cursor:pointer; font-size:.9rem; font-weight:500; border-bottom:2px solid transparent; margin-bottom:-2px; color:#888; transition:all .2s; }
-.tab.is-active { color:var(--navy); border-bottom-color:var(--peach); }
-.panel { display:none; padding:2rem; max-width:1400px; margin:0 auto; }
-.panel.is-active { display:block; }
+.topbar{background:var(--navy);color:var(--white);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+.topbar h1{font-size:1.1rem;font-weight:600;}
 
-/* ── Upload Area ── */
-.upload-area { background:var(--white); border:2px dashed #ccc; border-radius:12px; padding:3rem 2rem; text-align:center; margin-bottom:1.5rem; cursor:pointer; transition:border-color .2s; }
-.upload-area:hover { border-color:var(--peach); }
-.upload-area p { color:#888; margin-top:.5rem; }
-.upload-area .icon { font-size:2.5rem; color:var(--peach); }
+.main{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;}
 
-/* ── Bulk Toolbar ── */
-.bulk-toolbar { display:none; background:var(--navy); color:var(--white); padding:.75rem 1.5rem; border-radius:8px; margin-bottom:1rem; align-items:center; gap:1rem; flex-wrap:wrap; }
-.bulk-toolbar.is-active { display:flex; }
-.bulk-toolbar span { font-size:.9rem; }
-.bulk-toolbar .btn { font-size:.8rem; padding:.5rem 1rem; }
-.bulk-toolbar .btn--select-all { background:rgba(255,255,255,.15); color:var(--white); border:1px solid rgba(255,255,255,.3); }
-.bulk-toolbar .btn--deselect { background:transparent; color:var(--white); border:1px solid rgba(255,255,255,.3); }
+/* Upload */
+.upload-area{background:var(--white);border:2px dashed #ccc;border-radius:12px;padding:2.5rem 2rem;text-align:center;margin-bottom:1.5rem;cursor:pointer;transition:border-color .2s;}
+.upload-area:hover{border-color:var(--peach);}
+.upload-area .icon{font-size:2.5rem;color:var(--peach);}
+.upload-area p{color:#888;margin-top:.5rem;font-size:.9rem;}
 
-/* ── Upload Queue ── */
-.upload-queue { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:1.5rem; }
-.queue-item { background:var(--white); border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); position:relative; cursor:pointer; transition:outline .15s; }
-.queue-item.selected { outline:3px solid var(--peach); }
-.queue-item .check { position:absolute; top:8px; left:8px; width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,.9); border:2px solid #ccc; display:flex; align-items:center; justify-content:center; font-size:14px; z-index:2; }
-.queue-item.selected .check { background:var(--peach); border-color:var(--peach); color:var(--white); }
-.queue-item img { width:100%; height:140px; object-fit:cover; }
-.queue-item .info { padding:.5rem .75rem; font-size:.75rem; }
-.queue-item .info .status { color:#888; }
-.queue-item .info .status.saved { color:green; }
+/* Toolbar */
+.toolbar{display:flex;background:var(--navy);color:var(--white);padding:.6rem 1.2rem;border-radius:8px;margin-bottom:1rem;align-items:center;gap:.75rem;flex-wrap:wrap;}
+.toolbar span{font-size:.85rem;}
+.toolbar .btn{font-size:.8rem;padding:.4rem .8rem;}
+.toolbar .btn--light{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);}
 
-/* ── Tags ── */
-.tag-chips { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.25rem; }
-.tag-chip { display:inline-flex; align-items:center; gap:.25rem; padding:.3rem .7rem; border-radius:20px; font-size:.8rem; cursor:pointer; border:1px solid #ddd; background:var(--white); transition:all .15s; user-select:none; }
-.tag-chip.active { background:var(--navy); color:var(--white); border-color:var(--navy); }
-.tag-chip:hover { border-color:var(--peach); }
+/* Buttons */
+.btn{padding:.6rem 1.2rem;border:none;border-radius:6px;font-size:.85rem;cursor:pointer;font-family:inherit;font-weight:500;}
+.btn--primary{background:var(--navy);color:var(--white);}
+.btn--secondary{background:var(--blush);color:var(--navy);}
+.btn--danger{background:#c00;color:#fff;}
+.btn--sm{padding:.3rem .7rem;font-size:.75rem;}
 
-/* ── Metadata Form ── */
-.meta-form { background:var(--white); border-radius:12px; padding:2rem; box-shadow:0 1px 8px rgba(0,0,0,.05); margin-bottom:2rem; display:none; }
-.meta-form.is-active { display:block; }
-.meta-form h3 { margin-bottom:.5rem; font-size:1.1rem; }
-.meta-form .subtitle { font-size:.85rem; color:#888; margin-bottom:1.5rem; }
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-.form-group { display:flex; flex-direction:column; gap:.35rem; }
-.form-group.full { grid-column:1/-1; }
-.form-group label { font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:#888; }
-.form-group input, .form-group select { padding:.6rem .8rem; border:1px solid #ddd; border-radius:6px; font-size:.9rem; font-family:inherit; }
-.form-actions { grid-column:1/-1; display:flex; gap:1rem; margin-top:.5rem; }
-.btn { padding:.7rem 1.5rem; border:none; border-radius:6px; font-size:.9rem; cursor:pointer; font-family:inherit; font-weight:500; }
-.btn--primary { background:var(--navy); color:var(--white); }
-.btn--secondary { background:var(--blush); color:var(--navy); }
-.btn--danger { background:#c00; color:var(--white); }
+/* Series Group */
+.series-group{margin-bottom:2rem;}
+.series-header{font-size:.95rem;font-weight:600;padding:.5rem 0;border-bottom:2px solid var(--peach);margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center;}
+.series-header span{font-size:.8rem;color:#888;font-weight:400;}
 
-/* ── Gallery Preview ── */
-.preview-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; }
-.preview-card { background:var(--white); border-radius:8px; overflow:hidden; box-shadow:0 1px 6px rgba(0,0,0,.06); }
-.preview-card img { width:100%; height:180px; object-fit:cover; }
-.preview-card .card-body { padding:.75rem 1rem; }
-.preview-card .card-body h4 { font-size:.9rem; margin-bottom:.25rem; }
-.preview-card .card-body .tag-list { display:flex; flex-wrap:wrap; gap:.25rem; margin-bottom:.35rem; }
-.preview-card .card-body .tag-sm { font-size:.7rem; background:var(--blush); padding:.1rem .4rem; border-radius:3px; }
-.preview-card .card-body p { font-size:.8rem; color:#888; }
-.preview-card .card-actions { padding:.5rem 1rem; display:flex; gap:.5rem; border-top:1px solid #f0f0f0; }
-.preview-card .card-actions button { flex:1; padding:.35rem; border:none; border-radius:4px; cursor:pointer; font-size:.8rem; }
+/* Photo Grid */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;}
+.photo-card{background:var(--white);border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;cursor:pointer;transition:outline .15s;}
+.photo-card.selected{outline:3px solid var(--peach);}
+.photo-card .check{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:12px;z-index:2;color:transparent;}
+.photo-card.selected .check{background:var(--peach);border-color:var(--peach);color:#fff;}
+.photo-card img{width:100%;height:120px;object-fit:cover;}
+.photo-card .meta{padding:.4rem .5rem;font-size:.7rem;}
+.photo-card .meta .badges{display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.2rem;}
+.photo-card .meta .badge{font-size:.6rem;padding:1px 4px;border-radius:3px;font-weight:600;}
+.badge--visible{background:#d4edda;color:#155724;}
+.badge--hidden{background:#f8d7da;color:#721c24;}
+.badge--featured{background:var(--peach);color:var(--navy);}
 
-/* ── Responsive ── */
-@media(max-width:768px){
-  .form-grid{grid-template-columns:1fr;}
-  .tabs{padding:0 1rem;}
-  .tab{padding:.7rem 1rem;font-size:.8rem;}
-  .panel{padding:1rem;}
-}
+/* Tags */
+.tag-chips{display:flex;flex-wrap:wrap;gap:.35rem;}
+.tag-chip{display:inline-flex;padding:.25rem .6rem;border-radius:20px;font-size:.75rem;cursor:pointer;border:1px solid #ddd;background:var(--white);transition:all .15s;user-select:none;}
+.tag-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
 
-/* ── Toast ── */
-.toast { position:fixed; bottom:2rem; right:2rem; background:var(--navy); color:var(--white); padding:.75rem 1.5rem; border-radius:8px; font-size:.9rem; transform:translateY(100px); opacity:0; transition:all .3s; z-index:999; }
-.toast.is-visible { transform:translateY(0); opacity:1; }
+/* Edit Form */
+.edit-form{background:var(--white);border-radius:12px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:1.5rem;display:none;}
+.edit-form.is-active{display:block;}
+.edit-form h3{margin-bottom:.25rem;font-size:1rem;}
+.edit-form .sub{font-size:.8rem;color:#888;margin-bottom:1rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.form-group{display:flex;flex-direction:column;gap:.25rem;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#888;}
+.form-group input,.form-group select{padding:.5rem .7rem;border:1px solid #ddd;border-radius:6px;font-size:.85rem;font-family:inherit;}
+.form-actions{grid-column:1/-1;display:flex;gap:.75rem;margin-top:.25rem;}
+
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;}
+.toast.is-visible{transform:translateY(0);opacity:1;}
+
+@media(max-width:768px){.form-grid{grid-template-columns:1fr;}.main{padding:1rem;}}
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <h1>Coco Cadeaux — Portfolio Manager</h1>
+  <button class="btn btn--sm" onclick="loadGallery()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">Refresh</button>
 </div>
 
-<div class="tabs">
-  <div class="tab is-active" data-panel="upload">Upload</div>
-  <div class="tab" data-panel="gallery">Gallery Preview</div>
-</div>
-
-<!-- ── Upload Panel ── -->
-<div class="panel is-active" id="panel-upload">
+<div class="main">
   <div class="upload-area" id="uploadArea">
     <div class="icon">&#128247;</div>
-    <h3>Drag & drop photos here</h3>
-    <p>or click to browse — JPG, PNG, WebP accepted</p>
+    <h3>Upload Photos</h3>
+    <p>Click to browse or drag & drop — JPG, PNG, WebP</p>
   </div>
 
-  <div class="bulk-toolbar" id="bulkToolbar">
-    <span id="selectedCount">0 selected</span>
-    <button class="btn btn--select-all" id="selectAllBtn">Select All</button>
-    <button class="btn btn--deselect" id="deselectBtn">Deselect</button>
-    <button class="btn btn--primary" id="bulkEditBtn">Bulk Edit Selected</button>
+  <div class="toolbar" id="toolbar" style="display:none;">
+    <span id="selCount">0 selected</span>
+    <button class="btn btn--light" onclick="selectAll()">Select All</button>
+    <button class="btn btn--light" onclick="deselectAll()">Deselect</button>
+    <button class="btn btn--primary btn--sm" onclick="openBulkEdit()">Bulk Edit</button>
+    <button class="btn btn--sm" onclick="bulkToggleGallery(true)" style="background:#d4edda;color:#155724;border:none;">Show in Gallery</button>
+    <button class="btn btn--sm" onclick="bulkToggleGallery(false)" style="background:#f8d7da;color:#721c24;border:none;">Hide from Gallery</button>
   </div>
 
-  <div class="upload-queue" id="uploadQueue"></div>
-
-  <div class="meta-form" id="metaForm">
-    <h3 id="formTitle">Image Details</h3>
-    <p class="subtitle" id="formSubtitle">Fill in details for uploaded photo</p>
+  <div class="edit-form" id="editForm">
+    <h3 id="editTitle">Edit Details</h3>
+    <p class="sub" id="editSub">Update selected photos</p>
     <div class="form-grid">
       <div class="form-group full">
-        <label>Tags (select all that apply)</label>
+        <label>Tags</label>
         <div class="tag-chips" id="tagChips"></div>
       </div>
-      <div class="form-group">
-        <label>Series / Event Name</label>
-        <input type="text" id="metaSeries" placeholder="e.g. anderson-wedding">
-      </div>
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="metaTitle" placeholder="e.g. The Anderson Wedding">
-      </div>
-      <div class="form-group full">
-        <label>Alt Text</label>
-        <input type="text" id="metaAlt" placeholder="Describe the image for accessibility">
-      </div>
-      <div class="form-group">
-        <label>Photographer Name</label>
-        <input type="text" id="metaPhotog" placeholder="e.g. Sarah James Photography">
-      </div>
-      <div class="form-group">
-        <label>Photographer Link</label>
-        <input type="url" id="metaPhotogLink" placeholder="https://...">
-      </div>
-      <div class="form-group">
-        <label>Location</label>
-        <input type="text" id="metaLocation" placeholder="e.g. Oak Hill Estate, Franklin TN">
-      </div>
-      <div class="form-group">
-        <label>Year</label>
-        <input type="number" id="metaYear" placeholder="2026" value="2026">
-      </div>
-      <div class="form-group">
-        <label>Sort Order</label>
-        <input type="number" id="metaSort" placeholder="1" value="1">
-      </div>
-      <div class="form-group">
-        <label>Featured?</label>
-        <select id="metaFeatured">
-          <option value="FALSE">No</option>
-          <option value="TRUE">Yes</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Show in Gallery?</label>
-        <select id="metaShowGallery">
-          <option value="TRUE">Yes — show on website</option>
-          <option value="FALSE">No — hide from website</option>
-        </select>
-      </div>
+      <div class="form-group"><label>Series / Event</label><input type="text" id="fSeries" placeholder="e.g. anderson-wedding"></div>
+      <div class="form-group"><label>Title</label><input type="text" id="fTitle" placeholder="e.g. The Anderson Wedding"></div>
+      <div class="form-group full"><label>Alt Text</label><input type="text" id="fAlt" placeholder="Describe the image"></div>
+      <div class="form-group"><label>Photographer</label><input type="text" id="fPhotog" placeholder="e.g. Sarah James Photography"></div>
+      <div class="form-group"><label>Photographer Link</label><input type="url" id="fPhotogLink" placeholder="https://..."></div>
+      <div class="form-group"><label>Location</label><input type="text" id="fLocation" placeholder="e.g. Oak Hill Estate, Franklin TN"></div>
+      <div class="form-group"><label>Year</label><input type="number" id="fYear" placeholder="2026"></div>
+      <div class="form-group"><label>Sort Order</label><input type="number" id="fSort" placeholder="1"></div>
+      <div class="form-group"><label>Featured?</label><select id="fFeatured"><option value="FALSE">No</option><option value="TRUE">Yes</option></select></div>
+      <div class="form-group"><label>Show in Gallery?</label><select id="fShowGallery"><option value="FALSE">No — hidden</option><option value="TRUE">Yes — show on website</option></select></div>
       <div class="form-actions">
-        <button class="btn btn--primary" id="metaSave">Save to Portfolio</button>
-        <button class="btn btn--secondary" id="metaCancel">Cancel</button>
+        <button class="btn btn--primary" id="saveBtn" onclick="saveEdits()">Save Changes</button>
+        <button class="btn btn--secondary" onclick="closeEdit()">Cancel</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ── Gallery Preview Panel ── -->
-<div class="panel" id="panel-gallery">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
-    <h3>Portfolio Gallery</h3>
-    <div style="display:flex;gap:.5rem;">
-      <button class="btn btn--secondary" id="refreshGallery">Refresh</button>
-    </div>
-  </div>
-
-  <div class="bulk-toolbar" id="galBulkToolbar">
-    <span id="galSelectedCount">0 selected</span>
-    <button class="btn btn--select-all" id="galSelectAllBtn">Select All</button>
-    <button class="btn btn--deselect" id="galDeselectBtn">Deselect</button>
-    <button class="btn btn--primary" id="galBulkEditBtn">Bulk Edit Tags/Details</button>
-  </div>
-
-  <div class="preview-grid" id="previewGrid">
-    <p style="color:#888;">Loading portfolio...</p>
-  </div>
-
-  <!-- Gallery Edit Form (reused for single + bulk edit) -->
-  <div class="meta-form" id="galEditForm">
-    <h3 id="galFormTitle">Edit Details</h3>
-    <p class="subtitle" id="galFormSubtitle">Update details for selected photo(s)</p>
-    <div class="form-grid">
-      <div class="form-group full">
-        <label>Tags (select all that apply)</label>
-        <div class="tag-chips" id="galTagChips"></div>
-      </div>
-      <div class="form-group">
-        <label>Series / Event Name</label>
-        <input type="text" id="galSeries" placeholder="e.g. anderson-wedding">
-      </div>
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="galTitle" placeholder="e.g. The Anderson Wedding">
-      </div>
-      <div class="form-group full">
-        <label>Alt Text</label>
-        <input type="text" id="galAlt" placeholder="Describe the image">
-      </div>
-      <div class="form-group">
-        <label>Photographer Name</label>
-        <input type="text" id="galPhotog" placeholder="e.g. Sarah James Photography">
-      </div>
-      <div class="form-group">
-        <label>Photographer Link</label>
-        <input type="url" id="galPhotogLink" placeholder="https://...">
-      </div>
-      <div class="form-group">
-        <label>Location</label>
-        <input type="text" id="galLocation" placeholder="e.g. Oak Hill Estate, Franklin TN">
-      </div>
-      <div class="form-group">
-        <label>Year</label>
-        <input type="number" id="galYear" placeholder="2026">
-      </div>
-      <div class="form-group">
-        <label>Sort Order</label>
-        <input type="number" id="galSort" placeholder="1">
-      </div>
-      <div class="form-group">
-        <label>Featured?</label>
-        <select id="galFeatured">
-          <option value="FALSE">No</option>
-          <option value="TRUE">Yes</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Show in Gallery?</label>
-        <select id="galShowGallery">
-          <option value="TRUE">Yes — show on website</option>
-          <option value="FALSE">No — hide from website</option>
-        </select>
-      </div>
-      <div class="form-actions">
-        <button class="btn btn--primary" id="galSaveBtn">Save Changes</button>
-        <button class="btn btn--secondary" id="galCancelBtn">Cancel</button>
-      </div>
-    </div>
-  </div>
+  <div id="galleryContainer"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── CONFIG ── */
 const CONFIG = {
-  cloudName:    'dyxhnihhi',
-  uploadPreset: 'portfolio_unsigned',
-  folder:       'portfolio',
-  sheetApiUrl:  'https://script.google.com/macros/s/AKfycbxvQKQ3LkpozkBZjvP7H7fXNXei39nmq8EetSbs8AdI4Mgur_XIsvu_Vta_9WswNrtUbw/exec',
+  cloudName:'dyxhnihhi', uploadPreset:'portfolio_unsigned', folder:'portfolio',
+  sheetApiUrl:'https://script.google.com/macros/s/AKfycbxvQKQ3LkpozkBZjvP7H7fXNXei39nmq8EetSbs8AdI4Mgur_XIsvu_Vta_9WswNrtUbw/exec',
 };
-
 const TAGS = ['Weddings','Catering','Charcuterie','Grazing','Corporate','Showers','Events','Florals','Tablescapes','Picnics'];
-
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
-/* ── TABS ── */
-$$('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    $$('.tab').forEach(t => t.classList.remove('is-active'));
-    $$('.panel').forEach(p => p.classList.remove('is-active'));
-    tab.classList.add('is-active');
-    $(`#panel-${tab.dataset.panel}`).classList.add('is-active');
-    if (tab.dataset.panel === 'gallery') loadGallery();
-  });
-});
+/* ── Toast ── */
+function toast(msg){ const el=$('#toast');el.textContent=msg;el.classList.add('is-visible');setTimeout(()=>el.classList.remove('is-visible'),3000); }
 
-/* ── TOAST ── */
-function toast(msg) {
-  const el = $('#toast');
-  el.textContent = msg;
-  el.classList.add('is-visible');
-  setTimeout(() => el.classList.remove('is-visible'), 3000);
+/* ── Tags ── */
+let editTags = new Set();
+function renderTags(){
+  $('#tagChips').innerHTML = TAGS.map(t=>`<span class="tag-chip ${editTags.has(t)?'active':''}" onclick="toggleTag('${t}')">${t}</span>`).join('');
 }
+window.toggleTag = function(t){ if(editTags.has(t)) editTags.delete(t); else editTags.add(t); renderTags(); };
+renderTags();
 
-/* ── TAG CHIPS ── */
-let selectedTags = new Set();
-function renderTagChips() {
-  $('#tagChips').innerHTML = TAGS.map(t =>
-    `<span class="tag-chip ${selectedTags.has(t)?'active':''}" data-tag="${t}">${t}</span>`
-  ).join('');
-  $$('.tag-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const tag = chip.dataset.tag;
-      if (selectedTags.has(tag)) selectedTags.delete(tag); else selectedTags.add(tag);
-      renderTagChips();
-    });
-  });
-}
-renderTagChips();
+/* ── Cloudinary ── */
+const cld = document.createElement('script');
+cld.src = 'https://upload-widget.cloudinary.com/latest/global/all.js';
+document.head.appendChild(cld);
 
-/* ── CLOUDINARY UPLOAD ── */
-const cldScript = document.createElement('script');
-cldScript.src = 'https://upload-widget.cloudinary.com/latest/global/all.js';
-document.head.appendChild(cldScript);
-
-$('#uploadArea').addEventListener('click', () => {
-  if (typeof cloudinary === 'undefined') { toast('Widget loading...'); return; }
-  const widget = cloudinary.createUploadWidget({
-    cloudName: CONFIG.cloudName, uploadPreset: CONFIG.uploadPreset, folder: CONFIG.folder,
-    sources: ['local','camera'], multiple: true, maxFileSize: 15000000,
-    clientAllowedFormats: ['jpg','jpeg','png','webp'], showAdvancedOptions: false,
-    cropping: false, showPoweredBy: false,
-    styles: { palette: { window:'#FFFFFF', windowBorder:'#2F3847', tabIcon:'#2F3847', menuIcons:'#2F3847', textDark:'#2F3847', textLight:'#FFFFFF', link:'#EBBA98', action:'#EBBA98', inactiveTabIcon:'#999', error:'#C00', inProgress:'#EBBA98', complete:'#2F3847', sourceBg:'#F7F5F3' } }
-  }, (error, result) => {
-    if (error) { toast('Upload error: '+error.message); return; }
-    if (result.event === 'success') {
-      const info = result.info;
-      uploadedItems.push({ url: info.secure_url, public_id: info.public_id, saved: false, selected: false });
-      renderQueue();
-      toast('Photo uploaded!');
+$('#uploadArea').addEventListener('click', ()=>{
+  if(typeof cloudinary==='undefined'){toast('Widget loading...');return;}
+  const w = cloudinary.createUploadWidget({
+    cloudName:CONFIG.cloudName, uploadPreset:CONFIG.uploadPreset, folder:CONFIG.folder,
+    sources:['local','camera'], multiple:true, maxFileSize:15000000,
+    clientAllowedFormats:['jpg','jpeg','png','webp'], showAdvancedOptions:false, cropping:false, showPoweredBy:false,
+    styles:{palette:{window:'#FFF',windowBorder:'#2F3847',tabIcon:'#2F3847',menuIcons:'#2F3847',textDark:'#2F3847',textLight:'#FFF',link:'#EBBA98',action:'#EBBA98',inactiveTabIcon:'#999',error:'#C00',inProgress:'#EBBA98',complete:'#2F3847',sourceBg:'#F7F5F3'}}
+  }, (err,result)=>{
+    if(err){toast('Upload error');return;}
+    if(result.event==='success'){
+      const info=result.info;
+      // Auto-save with defaults (hidden from gallery)
+      fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'add',data:{image_url:info.secure_url,tags:'',series:'',title:'',alt_text:'',photographer_name:'',photographer_link:'',location:'',year:new Date().getFullYear().toString(),featured:'FALSE',sort_order:'1',show_in_gallery:'FALSE'}})
+      }).then(r=>r.json()).then(j=>{if(j.status==='ok')toast('Photo uploaded (hidden by default)');});
     }
+    if(result.event==='close') loadGallery();
   });
-  widget.open();
+  w.open();
 });
 
-/* ── UPLOAD QUEUE WITH MULTI-SELECT ── */
-const uploadedItems = [];
+/* ── Gallery Data ── */
+let data = [];
+let selected = new Set();
 
-function renderQueue() {
-  const container = $('#uploadQueue');
-  container.innerHTML = uploadedItems.map((item, i) => `
-    <div class="queue-item ${item.selected?'selected':''} ${item.saved?'':'unsaved'}" data-index="${i}" onclick="toggleSelect(${i})">
-      <div class="check">${item.selected?'&#10003;':''}</div>
-      <img src="${cloudinaryThumb(item.url, 360, 280)}" alt="Photo">
-      <div class="info">
-        <span class="status ${item.saved?'saved':''}">${item.saved?'Saved':'Pending'}</span>
-      </div>
-    </div>
-  `).join('');
-  updateBulkToolbar();
-}
-
-window.toggleSelect = function(i) {
-  uploadedItems[i].selected = !uploadedItems[i].selected;
-  renderQueue();
-};
-
-function getSelected() { return uploadedItems.filter(x => x.selected); }
-
-function updateBulkToolbar() {
-  const sel = getSelected();
-  const tb = $('#bulkToolbar');
-  if (uploadedItems.length > 0) {
-    tb.classList.add('is-active');
-    $('#selectedCount').textContent = sel.length + ' selected';
-  } else {
-    tb.classList.remove('is-active');
-  }
-}
-
-$('#selectAllBtn').addEventListener('click', () => {
-  uploadedItems.forEach(x => x.selected = true);
-  renderQueue();
-});
-$('#deselectBtn').addEventListener('click', () => {
-  uploadedItems.forEach(x => x.selected = false);
-  renderQueue();
-});
-
-/* ── BULK EDIT ── */
-let bulkMode = false;
-
-$('#bulkEditBtn').addEventListener('click', () => {
-  const sel = getSelected();
-  if (!sel.length) { toast('Select photos first'); return; }
-  bulkMode = true;
-  selectedTags = new Set();
-  renderTagChips();
-  clearFormFields();
-  $('#formTitle').textContent = `Bulk Edit (${sel.length} photos)`;
-  $('#formSubtitle').textContent = 'Fields you fill in will be applied to all selected photos. Leave blank to skip.';
-  $('#metaForm').classList.add('is-active');
-  window.scrollTo({ top: $('#metaForm').offsetTop - 20, behavior: 'smooth' });
-});
-
-/* ── SAVE ── */
-$('#metaSave').addEventListener('click', async () => {
-  const tags = Array.from(selectedTags).join(',');
-  if (!tags) { toast('Select at least one tag'); return; }
-
-  const formData = {
-    tags: tags,
-    series: $('#metaSeries').value,
-    title: $('#metaTitle').value,
-    alt_text: $('#metaAlt').value,
-    photographer_name: $('#metaPhotog').value,
-    photographer_link: $('#metaPhotogLink').value,
-    location: $('#metaLocation').value,
-    year: $('#metaYear').value,
-    featured: $('#metaFeatured').value,
-    sort_order: $('#metaSort').value,
-    show_in_gallery: $('#metaShowGallery').value
-  };
-
-  const targets = bulkMode ? getSelected() : [uploadedItems.find(x => x === currentSingle)];
-  if (!targets.length) { toast('No photos to save'); return; }
-
-  $('#metaSave').disabled = true;
-  $('#metaSave').textContent = 'Saving...';
-  let saved = 0;
-
-  for (const item of targets) {
-    const row = { ...formData, image_url: item.url };
-    try {
-      const res = await fetch(CONFIG.sheetApiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: 'add', data: row })
-      });
-      const json = await res.json();
-      if (json.status === 'ok') {
-        item.saved = true;
-        item.selected = false;
-        saved++;
-      }
-    } catch (err) { /* continue */ }
-  }
-
-  toast(`Saved ${saved} photo(s) to portfolio!`);
-  renderQueue();
-  closeForm();
-  $('#metaSave').disabled = false;
-  $('#metaSave').textContent = 'Save to Portfolio';
-});
-
-$('#metaCancel').addEventListener('click', closeForm);
-
-let currentSingle = null;
-
-function closeForm() {
-  $('#metaForm').classList.remove('is-active');
-  bulkMode = false;
-  currentSingle = null;
-}
-
-function clearFormFields() {
-  $('#metaSeries').value = '';
-  $('#metaTitle').value = '';
-  $('#metaAlt').value = '';
-  $('#metaPhotog').value = '';
-  $('#metaPhotogLink').value = '';
-  $('#metaLocation').value = '';
-  $('#metaYear').value = new Date().getFullYear();
-  $('#metaSort').value = '1';
-  $('#metaFeatured').value = 'FALSE';
-  $('#metaShowGallery').value = 'TRUE';
-}
-
-/* ── CLOUDINARY HELPERS ── */
-function cloudinaryThumb(url, w, h) {
-  return url.replace('/upload/', `/upload/c_fill,w_${w},h_${h},q_auto,f_auto/`);
-}
-
-/* ── GALLERY PREVIEW WITH MULTI-SELECT + EDIT ── */
-let galleryData = [];
-let galSelected = new Set(); // indices of selected gallery items
-let galEditTags = new Set();
-let galEditMode = ''; // 'single' or 'bulk'
-let galEditIndex = -1;
-
-async function loadGallery() {
-  const grid = $('#previewGrid');
-  grid.innerHTML = '<p style="color:#888;">Loading portfolio...</p>';
-  galSelected.clear();
-  updateGalToolbar();
-  try {
-    const res = await fetch(CONFIG.sheetApiUrl + '?action=get');
+async function loadGallery(){
+  selected.clear();
+  try{
+    const res = await fetch(CONFIG.sheetApiUrl+'?action=get');
     const json = await res.json();
-    if (json.status === 'ok') {
-      galleryData = json.data || [];
-      // Sort by series name, then sort_order within series
-      galleryData.sort(function(a, b) {
-        var sa = (a.series || 'zzz').toLowerCase();
-        var sb = (b.series || 'zzz').toLowerCase();
-        if (sa !== sb) return sa < sb ? -1 : 1;
-        return (parseInt(a.sort_order)||0) - (parseInt(b.sort_order)||0);
-      });
-      renderGallery();
-    } else {
-      grid.innerHTML = '<p style="color:#c00;">Error loading gallery data</p>';
-    }
-  } catch (err) {
-    grid.innerHTML = `<p style="color:#c00;">Could not connect: ${err.message}</p>`;
-  }
+    if(json.status==='ok') data=json.data||[];
+    else data=[];
+  }catch(e){data=[];}
+  render();
 }
 
-function renderGallery() {
-  const grid = $('#previewGrid');
-  if (!galleryData.length) {
-    grid.innerHTML = '<p style="color:#888;">No portfolio items yet. Upload some photos!</p>';
-    return;
-  }
-  grid.innerHTML = galleryData.map((item, i) => {
-    const tags = (item.tags || '').split(',').filter(Boolean);
-    const sel = galSelected.has(i);
-    return `
-    <div class="preview-card ${sel?'selected':''}" style="${sel?'outline:3px solid var(--peach)':''}">
-      <div style="position:relative;">
-        <div class="check" onclick="galToggle(${i})" style="position:absolute;top:8px;left:8px;width:24px;height:24px;border-radius:50%;background:${sel?'var(--peach)':'rgba(255,255,255,.9)'};border:2px solid ${sel?'var(--peach)':'#ccc'};display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:2;color:${sel?'#fff':'transparent'};">${sel?'&#10003;':''}</div>
-        <img src="${cloudinaryThumb(item.image_url || '', 440, 360)}" alt="${item.alt_text || item.title || ''}" loading="lazy">
-      </div>
-      <div class="card-body">
-        <div class="tag-list">${tags.map(t => `<span class="tag-sm">${t.trim()}</span>`).join('')}</div>
-        <h4>${item.title || 'Untitled'}</h4>
-        <p style="font-size:.75rem;color:#888;">${item.series ? '<strong>Series:</strong> '+item.series+' ' : ''}${item.photographer_name ? '&bull; '+item.photographer_name : ''}</p>
-        <p style="font-size:.7rem;margin-top:4px;">${item.show_in_gallery === 'FALSE' ? '<span style="color:#c00;font-weight:600;">HIDDEN from gallery</span>' : '<span style="color:green;">Visible in gallery</span>'}${item.featured === 'TRUE' ? ' &bull; <span style="color:var(--peach);font-weight:600;">Featured</span>' : ''}</p>
-      </div>
-      <div class="card-actions">
-        <button onclick="galEditSingle(${i})" style="background:var(--blush);">Edit</button>
-        <button onclick="deleteItem(${i})" style="background:#fee;color:#c00;">Delete</button>
-      </div>
-    </div>`;
-  }).join('');
-  updateGalToolbar();
-}
-
-window.galToggle = function(i) {
-  if (galSelected.has(i)) galSelected.delete(i); else galSelected.add(i);
-  renderGallery();
-};
-
-function updateGalToolbar() {
-  const tb = $('#galBulkToolbar');
-  if (galleryData.length > 0) {
-    tb.classList.add('is-active');
-    $('#galSelectedCount').textContent = galSelected.size + ' selected';
-  } else {
-    tb.classList.remove('is-active');
-  }
-}
-
-$('#galSelectAllBtn').addEventListener('click', () => {
-  galleryData.forEach((_, i) => galSelected.add(i));
-  renderGallery();
-});
-$('#galDeselectBtn').addEventListener('click', () => {
-  galSelected.clear();
-  renderGallery();
-});
-
-/* ── GALLERY EDIT TAG CHIPS ── */
-function renderGalTagChips() {
-  $('#galTagChips').innerHTML = TAGS.map(t =>
-    `<span class="tag-chip ${galEditTags.has(t)?'active':''}" data-tag="${t}">${t}</span>`
-  ).join('');
-  $$('#galTagChips .tag-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const tag = chip.dataset.tag;
-      if (galEditTags.has(tag)) galEditTags.delete(tag); else galEditTags.add(tag);
-      renderGalTagChips();
-    });
+function render(){
+  // Group by series
+  const groups = {};
+  const unsorted = [];
+  data.forEach((item,i)=>{
+    item._idx = i; // track original index for update
+    const s = item.series || '';
+    if(!s){ unsorted.push(item); return; }
+    if(!groups[s]) groups[s]=[];
+    groups[s].push(item);
   });
+  // Sort within each group by sort_order
+  Object.values(groups).forEach(g=>g.sort((a,b)=>(parseInt(a.sort_order)||0)-(parseInt(b.sort_order)||0)));
+
+  let html = '';
+
+  // Unsorted first
+  if(unsorted.length){
+    html += renderGroup('Untagged / No Series', unsorted);
+  }
+  // Then sorted groups
+  const sortedKeys = Object.keys(groups).sort();
+  sortedKeys.forEach(k=>{
+    html += renderGroup(k, groups[k]);
+  });
+
+  if(!data.length) html='<p style="color:#888;text-align:center;padding:2rem;">No photos yet. Upload some!</p>';
+
+  $('#galleryContainer').innerHTML = html;
+  updateToolbar();
 }
 
-/* ── SINGLE EDIT ── */
-window.galEditSingle = function(i) {
-  galEditMode = 'single';
-  galEditIndex = i;
-  const item = galleryData[i];
-  galEditTags = new Set((item.tags||'').split(',').map(t=>t.trim()).filter(Boolean));
-  renderGalTagChips();
-  $('#galSeries').value = item.series || '';
-  $('#galTitle').value = item.title || '';
-  $('#galAlt').value = item.alt_text || '';
-  $('#galPhotog').value = item.photographer_name || '';
-  $('#galPhotogLink').value = item.photographer_link || '';
-  $('#galLocation').value = item.location || '';
-  $('#galYear').value = item.year || '';
-  $('#galSort').value = item.sort_order || '1';
-  $('#galFeatured').value = item.featured || 'FALSE';
-  $('#galShowGallery').value = item.show_in_gallery || 'TRUE';
-  $('#galFormTitle').textContent = 'Edit: ' + (item.title || 'Photo');
-  $('#galFormSubtitle').textContent = 'Update details for this photo';
-  $('#galEditForm').classList.add('is-active');
-  window.scrollTo({ top: $('#galEditForm').offsetTop - 20, behavior: 'smooth' });
+function renderGroup(name, items){
+  const visCount = items.filter(x=>x.show_in_gallery==='TRUE').length;
+  return `<div class="series-group">
+    <div class="series-header">${name} <span>${items.length} photos &bull; ${visCount} visible in gallery</span></div>
+    <div class="photo-grid">${items.map(item=>{
+      const i = item._idx;
+      const sel = selected.has(i);
+      const vis = item.show_in_gallery==='TRUE';
+      const feat = item.featured==='TRUE';
+      const tags = (item.tags||'').split(',').filter(Boolean);
+      return `<div class="photo-card ${sel?'selected':''}" onclick="toggle(${i})">
+        <div class="check">${sel?'&#10003;':''}</div>
+        <img src="${thumb(item.image_url,320,240)}" loading="lazy">
+        <div class="meta">
+          <div style="font-weight:500;">${item.title||'Untitled'}</div>
+          <div class="badges">
+            ${tags.map(t=>`<span class="badge" style="background:var(--blush);">${t.trim()}</span>`).join('')}
+            <span class="badge ${vis?'badge--visible':'badge--hidden'}">${vis?'Visible':'Hidden'}</span>
+            ${feat?'<span class="badge badge--featured">Featured</span>':''}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}</div>
+  </div>`;
+}
+
+function thumb(url,w,h){return (url||'').replace('/upload/',`/upload/c_fill,w_${w},h_${h},q_auto,f_auto/`);}
+
+/* ── Selection ── */
+window.toggle = function(i){ if(selected.has(i)) selected.delete(i); else selected.add(i); render(); };
+window.selectAll = function(){ data.forEach((_,i)=>selected.add(i)); render(); };
+window.deselectAll = function(){ selected.clear(); render(); };
+
+function updateToolbar(){
+  const tb=$('#toolbar');
+  if(data.length){tb.style.display='flex';$('#selCount').textContent=selected.size+' selected';}
+  else tb.style.display='none';
+}
+
+/* ── Quick Gallery Toggle ── */
+window.bulkToggleGallery = async function(show){
+  if(!selected.size){toast('Select photos first');return;}
+  let count=0;
+  for(const idx of selected){
+    const item=data[idx];
+    const row={image_url:item.image_url,tags:item.tags||'',series:item.series||'',title:item.title||'',alt_text:item.alt_text||'',photographer_name:item.photographer_name||'',photographer_link:item.photographer_link||'',location:item.location||'',year:item.year||'',featured:item.featured||'FALSE',sort_order:item.sort_order||'1',show_in_gallery:show?'TRUE':'FALSE'};
+    try{
+      const res=await fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})});
+      const j=await res.json(); if(j.status==='ok')count++;
+    }catch(e){}
+  }
+  toast(`${count} photo(s) ${show?'shown':'hidden'}`);
+  selected.clear(); loadGallery();
 };
 
-/* ── BULK EDIT (gallery) ── */
-$('#galBulkEditBtn').addEventListener('click', () => {
-  if (!galSelected.size) { toast('Select photos first'); return; }
-  galEditMode = 'bulk';
-  galEditTags = new Set();
-  renderGalTagChips();
-  $('#galSeries').value = '';
-  $('#galTitle').value = '';
-  $('#galAlt').value = '';
-  $('#galPhotog').value = '';
-  $('#galPhotogLink').value = '';
-  $('#galLocation').value = '';
-  $('#galYear').value = '';
-  $('#galSort').value = '';
-  $('#galFeatured').value = 'FALSE';
-  $('#galShowGallery').value = 'TRUE';
-  $('#galFormTitle').textContent = `Bulk Edit (${galSelected.size} photos)`;
-  $('#galFormSubtitle').textContent = 'Only fields you fill in will be updated. Tags will REPLACE existing tags.';
-  $('#galEditForm').classList.add('is-active');
-  window.scrollTo({ top: $('#galEditForm').offsetTop - 20, behavior: 'smooth' });
-});
+/* ── Edit Form ── */
+let editMode=''; // 'single' or 'bulk'
+let editIdx=-1;
 
-/* ── SAVE GALLERY EDITS ── */
-$('#galSaveBtn').addEventListener('click', async () => {
-  const tags = Array.from(galEditTags).join(',');
-  const indices = galEditMode === 'single' ? [galEditIndex] : Array.from(galSelected);
+window.openBulkEdit = function(){
+  if(!selected.size){toast('Select photos first');return;}
+  editMode='bulk';
+  editTags=new Set(); renderTags();
+  ['fSeries','fTitle','fAlt','fPhotog','fPhotogLink','fLocation','fYear','fSort'].forEach(id=>$('#'+id).value='');
+  $('#fFeatured').value='FALSE'; $('#fShowGallery').value='FALSE';
+  $('#editTitle').textContent=`Bulk Edit (${selected.size} photos)`;
+  $('#editSub').textContent='Only filled fields will update. Tags will replace existing.';
+  $('#editForm').classList.add('is-active');
+  window.scrollTo({top:$('#editForm').offsetTop-20,behavior:'smooth'});
+};
 
-  $('#galSaveBtn').disabled = true;
-  $('#galSaveBtn').textContent = 'Saving...';
-  let saved = 0;
+window.closeEdit = function(){ $('#editForm').classList.remove('is-active'); editMode=''; };
 
-  for (const idx of indices) {
-    const item = galleryData[idx];
-    const row = {
-      image_url: item.image_url,
-      tags: tags || item.tags || '',
-      series: $('#galSeries').value || item.series || '',
-      title: $('#galTitle').value || item.title || '',
-      alt_text: $('#galAlt').value || item.alt_text || '',
-      photographer_name: $('#galPhotog').value || item.photographer_name || '',
-      photographer_link: $('#galPhotogLink').value || item.photographer_link || '',
-      location: $('#galLocation').value || item.location || '',
-      year: $('#galYear').value || item.year || '',
-      featured: $('#galFeatured').value || item.featured || 'FALSE',
-      sort_order: $('#galSort').value || item.sort_order || '1',
-      show_in_gallery: $('#galShowGallery').value || item.show_in_gallery || 'TRUE'
+window.saveEdits = async function(){
+  const tags = Array.from(editTags).join(',');
+  const indices = editMode==='single'?[editIdx]:Array.from(selected);
+  $('#saveBtn').disabled=true; $('#saveBtn').textContent='Saving...';
+  let count=0;
+  for(const idx of indices){
+    const item=data[idx];
+    const row={
+      image_url:item.image_url,
+      tags: tags||item.tags||'',
+      series: $('#fSeries').value||item.series||'',
+      title: $('#fTitle').value||item.title||'',
+      alt_text: $('#fAlt').value||item.alt_text||'',
+      photographer_name: $('#fPhotog').value||item.photographer_name||'',
+      photographer_link: $('#fPhotogLink').value||item.photographer_link||'',
+      location: $('#fLocation').value||item.location||'',
+      year: $('#fYear').value||item.year||'',
+      featured: $('#fFeatured').value||item.featured||'FALSE',
+      sort_order: $('#fSort').value||item.sort_order||'1',
+      show_in_gallery: $('#fShowGallery').value||item.show_in_gallery||'FALSE'
     };
-    try {
-      const res = await fetch(CONFIG.sheetApiUrl, {
-        method: 'POST', headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: 'update', rowIndex: idx + 2, data: row })
-      });
-      const json = await res.json();
-      if (json.status === 'ok') saved++;
-    } catch (err) { /* continue */ }
+    try{
+      const res=await fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})});
+      const j=await res.json(); if(j.status==='ok')count++;
+    }catch(e){}
   }
-
-  toast(`Updated ${saved} photo(s)!`);
-  $('#galEditForm').classList.remove('is-active');
-  galSelected.clear();
-  $('#galSaveBtn').disabled = false;
-  $('#galSaveBtn').textContent = 'Save Changes';
-  loadGallery();
-});
-
-$('#galCancelBtn').addEventListener('click', () => {
-  $('#galEditForm').classList.remove('is-active');
-});
-
-$('#refreshGallery').addEventListener('click', loadGallery);
-
-window.deleteItem = async function(index) {
-  if (!confirm('Remove this item from the portfolio?')) return;
-  try {
-    const res = await fetch(CONFIG.sheetApiUrl, {
-      method: 'POST', headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'delete', rowIndex: index + 2 })
-    });
-    const json = await res.json();
-    if (json.status === 'ok') { toast('Removed'); loadGallery(); }
-    else toast('Delete failed');
-  } catch (err) { toast('Delete failed: '+err.message); }
+  toast(`Updated ${count} photo(s)`);
+  $('#saveBtn').disabled=false; $('#saveBtn').textContent='Save Changes';
+  closeEdit(); selected.clear(); loadGallery();
 };
 
-/* ── DRAG & DROP ── */
-const uploadArea = $('#uploadArea');
-uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor = '#EBBA98'; });
-uploadArea.addEventListener('dragleave', e => { e.preventDefault(); uploadArea.style.borderColor = '#ccc'; });
-uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.style.borderColor = '#ccc'; uploadArea.click(); });
-
-/* ── INIT ── */
+/* ── Init ── */
 loadGallery();
 </script>
 </body>
