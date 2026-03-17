@@ -172,6 +172,13 @@ a { color:var(--navy); }
           <option value="TRUE">Yes</option>
         </select>
       </div>
+      <div class="form-group">
+        <label>Show in Gallery?</label>
+        <select id="metaShowGallery">
+          <option value="TRUE">Yes — show on website</option>
+          <option value="FALSE">No — hide from website</option>
+        </select>
+      </div>
       <div class="form-actions">
         <button class="btn btn--primary" id="metaSave">Save to Portfolio</button>
         <button class="btn btn--secondary" id="metaCancel">Cancel</button>
@@ -182,12 +189,84 @@ a { color:var(--navy); }
 
 <!-- ── Gallery Preview Panel ── -->
 <div class="panel" id="panel-gallery">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
     <h3>Portfolio Gallery</h3>
-    <button class="btn btn--secondary" id="refreshGallery">Refresh</button>
+    <div style="display:flex;gap:.5rem;">
+      <button class="btn btn--secondary" id="refreshGallery">Refresh</button>
+    </div>
   </div>
+
+  <div class="bulk-toolbar" id="galBulkToolbar">
+    <span id="galSelectedCount">0 selected</span>
+    <button class="btn btn--select-all" id="galSelectAllBtn">Select All</button>
+    <button class="btn btn--deselect" id="galDeselectBtn">Deselect</button>
+    <button class="btn btn--primary" id="galBulkEditBtn">Bulk Edit Tags/Details</button>
+  </div>
+
   <div class="preview-grid" id="previewGrid">
     <p style="color:#888;">Loading portfolio...</p>
+  </div>
+
+  <!-- Gallery Edit Form (reused for single + bulk edit) -->
+  <div class="meta-form" id="galEditForm">
+    <h3 id="galFormTitle">Edit Details</h3>
+    <p class="subtitle" id="galFormSubtitle">Update details for selected photo(s)</p>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Tags (select all that apply)</label>
+        <div class="tag-chips" id="galTagChips"></div>
+      </div>
+      <div class="form-group">
+        <label>Series / Event Name</label>
+        <input type="text" id="galSeries" placeholder="e.g. anderson-wedding">
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="galTitle" placeholder="e.g. The Anderson Wedding">
+      </div>
+      <div class="form-group full">
+        <label>Alt Text</label>
+        <input type="text" id="galAlt" placeholder="Describe the image">
+      </div>
+      <div class="form-group">
+        <label>Photographer Name</label>
+        <input type="text" id="galPhotog" placeholder="e.g. Sarah James Photography">
+      </div>
+      <div class="form-group">
+        <label>Photographer Link</label>
+        <input type="url" id="galPhotogLink" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="galLocation" placeholder="e.g. Oak Hill Estate, Franklin TN">
+      </div>
+      <div class="form-group">
+        <label>Year</label>
+        <input type="number" id="galYear" placeholder="2026">
+      </div>
+      <div class="form-group">
+        <label>Sort Order</label>
+        <input type="number" id="galSort" placeholder="1">
+      </div>
+      <div class="form-group">
+        <label>Featured?</label>
+        <select id="galFeatured">
+          <option value="FALSE">No</option>
+          <option value="TRUE">Yes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Show in Gallery?</label>
+        <select id="galShowGallery">
+          <option value="TRUE">Yes — show on website</option>
+          <option value="FALSE">No — hide from website</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn--primary" id="galSaveBtn">Save Changes</button>
+        <button class="btn btn--secondary" id="galCancelBtn">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -342,7 +421,8 @@ $('#metaSave').addEventListener('click', async () => {
     location: $('#metaLocation').value,
     year: $('#metaYear').value,
     featured: $('#metaFeatured').value,
-    sort_order: $('#metaSort').value
+    sort_order: $('#metaSort').value,
+    show_in_gallery: $('#metaShowGallery').value
   };
 
   const targets = bulkMode ? getSelected() : [uploadedItems.find(x => x === currentSingle)];
@@ -396,6 +476,7 @@ function clearFormFields() {
   $('#metaYear').value = new Date().getFullYear();
   $('#metaSort').value = '1';
   $('#metaFeatured').value = 'FALSE';
+  $('#metaShowGallery').value = 'TRUE';
 }
 
 /* ── CLOUDINARY HELPERS ── */
@@ -403,17 +484,30 @@ function cloudinaryThumb(url, w, h) {
   return url.replace('/upload/', `/upload/c_fill,w_${w},h_${h},q_auto,f_auto/`);
 }
 
-/* ── GALLERY PREVIEW ── */
+/* ── GALLERY PREVIEW WITH MULTI-SELECT + EDIT ── */
 let galleryData = [];
+let galSelected = new Set(); // indices of selected gallery items
+let galEditTags = new Set();
+let galEditMode = ''; // 'single' or 'bulk'
+let galEditIndex = -1;
 
 async function loadGallery() {
   const grid = $('#previewGrid');
   grid.innerHTML = '<p style="color:#888;">Loading portfolio...</p>';
+  galSelected.clear();
+  updateGalToolbar();
   try {
     const res = await fetch(CONFIG.sheetApiUrl + '?action=get');
     const json = await res.json();
     if (json.status === 'ok') {
       galleryData = json.data || [];
+      // Sort by series name, then sort_order within series
+      galleryData.sort(function(a, b) {
+        var sa = (a.series || 'zzz').toLowerCase();
+        var sb = (b.series || 'zzz').toLowerCase();
+        if (sa !== sb) return sa < sb ? -1 : 1;
+        return (parseInt(a.sort_order)||0) - (parseInt(b.sort_order)||0);
+      });
       renderGallery();
     } else {
       grid.innerHTML = '<p style="color:#c00;">Error loading gallery data</p>';
@@ -431,20 +525,157 @@ function renderGallery() {
   }
   grid.innerHTML = galleryData.map((item, i) => {
     const tags = (item.tags || '').split(',').filter(Boolean);
+    const sel = galSelected.has(i);
     return `
-    <div class="preview-card">
-      <img src="${cloudinaryThumb(item.image_url || '', 440, 360)}" alt="${item.alt_text || item.title || ''}" loading="lazy">
+    <div class="preview-card ${sel?'selected':''}" style="${sel?'outline:3px solid var(--peach)':''}">
+      <div style="position:relative;">
+        <div class="check" onclick="galToggle(${i})" style="position:absolute;top:8px;left:8px;width:24px;height:24px;border-radius:50%;background:${sel?'var(--peach)':'rgba(255,255,255,.9)'};border:2px solid ${sel?'var(--peach)':'#ccc'};display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:2;color:${sel?'#fff':'transparent'};">${sel?'&#10003;':''}</div>
+        <img src="${cloudinaryThumb(item.image_url || '', 440, 360)}" alt="${item.alt_text || item.title || ''}" loading="lazy">
+      </div>
       <div class="card-body">
         <div class="tag-list">${tags.map(t => `<span class="tag-sm">${t.trim()}</span>`).join('')}</div>
         <h4>${item.title || 'Untitled'}</h4>
-        <p>${item.photographer_name ? 'Photo: '+item.photographer_name : ''} ${item.location ? '&bull; '+item.location : ''}</p>
+        <p style="font-size:.75rem;color:#888;">${item.series ? '<strong>Series:</strong> '+item.series+' ' : ''}${item.photographer_name ? '&bull; '+item.photographer_name : ''}</p>
+        <p style="font-size:.7rem;margin-top:4px;">${item.show_in_gallery === 'FALSE' ? '<span style="color:#c00;font-weight:600;">HIDDEN from gallery</span>' : '<span style="color:green;">Visible in gallery</span>'}${item.featured === 'TRUE' ? ' &bull; <span style="color:var(--peach);font-weight:600;">Featured</span>' : ''}</p>
       </div>
       <div class="card-actions">
+        <button onclick="galEditSingle(${i})" style="background:var(--blush);">Edit</button>
         <button onclick="deleteItem(${i})" style="background:#fee;color:#c00;">Delete</button>
       </div>
     </div>`;
   }).join('');
+  updateGalToolbar();
 }
+
+window.galToggle = function(i) {
+  if (galSelected.has(i)) galSelected.delete(i); else galSelected.add(i);
+  renderGallery();
+};
+
+function updateGalToolbar() {
+  const tb = $('#galBulkToolbar');
+  if (galleryData.length > 0) {
+    tb.classList.add('is-active');
+    $('#galSelectedCount').textContent = galSelected.size + ' selected';
+  } else {
+    tb.classList.remove('is-active');
+  }
+}
+
+$('#galSelectAllBtn').addEventListener('click', () => {
+  galleryData.forEach((_, i) => galSelected.add(i));
+  renderGallery();
+});
+$('#galDeselectBtn').addEventListener('click', () => {
+  galSelected.clear();
+  renderGallery();
+});
+
+/* ── GALLERY EDIT TAG CHIPS ── */
+function renderGalTagChips() {
+  $('#galTagChips').innerHTML = TAGS.map(t =>
+    `<span class="tag-chip ${galEditTags.has(t)?'active':''}" data-tag="${t}">${t}</span>`
+  ).join('');
+  $$('#galTagChips .tag-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const tag = chip.dataset.tag;
+      if (galEditTags.has(tag)) galEditTags.delete(tag); else galEditTags.add(tag);
+      renderGalTagChips();
+    });
+  });
+}
+
+/* ── SINGLE EDIT ── */
+window.galEditSingle = function(i) {
+  galEditMode = 'single';
+  galEditIndex = i;
+  const item = galleryData[i];
+  galEditTags = new Set((item.tags||'').split(',').map(t=>t.trim()).filter(Boolean));
+  renderGalTagChips();
+  $('#galSeries').value = item.series || '';
+  $('#galTitle').value = item.title || '';
+  $('#galAlt').value = item.alt_text || '';
+  $('#galPhotog').value = item.photographer_name || '';
+  $('#galPhotogLink').value = item.photographer_link || '';
+  $('#galLocation').value = item.location || '';
+  $('#galYear').value = item.year || '';
+  $('#galSort').value = item.sort_order || '1';
+  $('#galFeatured').value = item.featured || 'FALSE';
+  $('#galShowGallery').value = item.show_in_gallery || 'TRUE';
+  $('#galFormTitle').textContent = 'Edit: ' + (item.title || 'Photo');
+  $('#galFormSubtitle').textContent = 'Update details for this photo';
+  $('#galEditForm').classList.add('is-active');
+  window.scrollTo({ top: $('#galEditForm').offsetTop - 20, behavior: 'smooth' });
+};
+
+/* ── BULK EDIT (gallery) ── */
+$('#galBulkEditBtn').addEventListener('click', () => {
+  if (!galSelected.size) { toast('Select photos first'); return; }
+  galEditMode = 'bulk';
+  galEditTags = new Set();
+  renderGalTagChips();
+  $('#galSeries').value = '';
+  $('#galTitle').value = '';
+  $('#galAlt').value = '';
+  $('#galPhotog').value = '';
+  $('#galPhotogLink').value = '';
+  $('#galLocation').value = '';
+  $('#galYear').value = '';
+  $('#galSort').value = '';
+  $('#galFeatured').value = 'FALSE';
+  $('#galShowGallery').value = 'TRUE';
+  $('#galFormTitle').textContent = `Bulk Edit (${galSelected.size} photos)`;
+  $('#galFormSubtitle').textContent = 'Only fields you fill in will be updated. Tags will REPLACE existing tags.';
+  $('#galEditForm').classList.add('is-active');
+  window.scrollTo({ top: $('#galEditForm').offsetTop - 20, behavior: 'smooth' });
+});
+
+/* ── SAVE GALLERY EDITS ── */
+$('#galSaveBtn').addEventListener('click', async () => {
+  const tags = Array.from(galEditTags).join(',');
+  const indices = galEditMode === 'single' ? [galEditIndex] : Array.from(galSelected);
+
+  $('#galSaveBtn').disabled = true;
+  $('#galSaveBtn').textContent = 'Saving...';
+  let saved = 0;
+
+  for (const idx of indices) {
+    const item = galleryData[idx];
+    const row = {
+      image_url: item.image_url,
+      tags: tags || item.tags || '',
+      series: $('#galSeries').value || item.series || '',
+      title: $('#galTitle').value || item.title || '',
+      alt_text: $('#galAlt').value || item.alt_text || '',
+      photographer_name: $('#galPhotog').value || item.photographer_name || '',
+      photographer_link: $('#galPhotogLink').value || item.photographer_link || '',
+      location: $('#galLocation').value || item.location || '',
+      year: $('#galYear').value || item.year || '',
+      featured: $('#galFeatured').value || item.featured || 'FALSE',
+      sort_order: $('#galSort').value || item.sort_order || '1',
+      show_in_gallery: $('#galShowGallery').value || item.show_in_gallery || 'TRUE'
+    };
+    try {
+      const res = await fetch(CONFIG.sheetApiUrl, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'update', rowIndex: idx + 2, data: row })
+      });
+      const json = await res.json();
+      if (json.status === 'ok') saved++;
+    } catch (err) { /* continue */ }
+  }
+
+  toast(`Updated ${saved} photo(s)!`);
+  $('#galEditForm').classList.remove('is-active');
+  galSelected.clear();
+  $('#galSaveBtn').disabled = false;
+  $('#galSaveBtn').textContent = 'Save Changes';
+  loadGallery();
+});
+
+$('#galCancelBtn').addEventListener('click', () => {
+  $('#galEditForm').classList.remove('is-active');
+});
 
 $('#refreshGallery').addEventListener('click', loadGallery);
 
