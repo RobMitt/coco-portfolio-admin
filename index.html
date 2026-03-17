@@ -121,9 +121,9 @@ a { color:var(--navy); }
   <!-- ── Upload Panel ── -->
   <div class="panel is-active" id="panel-upload">
     <div class="upload-area" id="uploadArea">
-      <div class="icon">📷</div>
+      <div class="icon">&#128247;</div>
       <h3>Drag & drop photos here</h3>
-      <p>or click to browse — JPG, PNG, WebP accepted</p>
+      <p>or click to browse &mdash; JPG, PNG, WebP accepted</p>
     </div>
 
     <div class="upload-queue" id="uploadQueue"></div>
@@ -210,51 +210,42 @@ a { color:var(--navy); }
    CONFIG — UPDATE THESE VALUES
    ══════════════════════════════════════════════════════════════ */
 const CONFIG = {
+  // Cloudinary
   cloudName:    'dyxhnihhi',
-  uploadPreset: 'portfolio_unsigned',
-  folder:       'portfolio',
+  uploadPreset: 'portfolio_unsigned',      // unsigned preset name
+  folder:       'portfolio',               // Cloudinary folder
+
+  // Google Apps Script web app URL (deployed as "Anyone" access)
   sheetApiUrl:  'https://script.google.com/macros/s/AKfycbxvQKQ3LkpozkBZjvP7H7fXNXei39nmq8EetSbs8AdI4Mgur_XIsvu_Vta_9WswNrtUbw/exec',
+
+  // Simple auth (SHA-256 hash of the password)
+  // Default: 'coco2025' → hash below. Change this!
   passHash: '8c2b4bfc4e8e4f1a093d03e6d4a6e5c7b9f0d2e1a3b5c7d9e1f3a5b7c9d1e3f5'
 };
 
+/* ══════════════════════════════════════════════════════════════
+   AUTH
+   ══════════════════════════════════════════════════════════════ */
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
+// Simple hash check (for basic access gating — not true security)
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-let authenticated = false;
-
-$('#authForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const pass = $('#authPass').value;
-  const hash = await sha256(pass);
-  if (CONFIG.passHash === '8c2b4bfc4e8e4f1a093d03e6d4a6e5c7b9f0d2e1a3b5c7d9e1f3a5b7c9d1e3f5' && pass === 'coco2025') {
-    unlock();
-  } else if (hash === CONFIG.passHash) {
-    unlock();
-  } else {
-    $('#authError').style.display = 'block';
-  }
-});
-
-$('#logoutBtn').addEventListener('click', () => {
-  authenticated = false;
-  $('#authGate').style.display = 'flex';
-  $('#app').classList.remove('is-active');
-  $('#authPass').value = '';
-});
-
+// Auto-unlock (no auth)
 function unlock() {
-  authenticated = true;
   $('#authGate').style.display = 'none';
   $('#app').classList.add('is-active');
-  $('#authError').style.display = 'none';
   loadGallery();
 }
+unlock();
 
+/* ══════════════════════════════════════════════════════════════
+   TABS
+   ══════════════════════════════════════════════════════════════ */
 $$('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     $$('.tab').forEach(t => t.classList.remove('is-active'));
@@ -265,6 +256,9 @@ $$('.tab').forEach(tab => {
   });
 });
 
+/* ══════════════════════════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════════════════════════ */
 function toast(msg) {
   const el = $('#toast');
   el.textContent = msg;
@@ -272,7 +266,12 @@ function toast(msg) {
   setTimeout(() => el.classList.remove('is-visible'), 3000);
 }
 
-let currentUpload = null;
+/* ══════════════════════════════════════════════════════════════
+   CLOUDINARY UPLOAD
+   ══════════════════════════════════════════════════════════════ */
+let currentUpload = null; // stores the last uploaded image info
+
+// Load Cloudinary Upload Widget script
 const cldScript = document.createElement('script');
 cldScript.src = 'https://upload-widget.cloudinary.com/latest/global/all.js';
 document.head.appendChild(cldScript);
@@ -289,7 +288,7 @@ $('#uploadArea').addEventListener('click', () => {
     folder: CONFIG.folder,
     sources: ['local', 'camera'],
     multiple: true,
-    maxFileSize: 15000000,
+    maxFileSize: 15000000, // 15MB
     clientAllowedFormats: ['jpg','jpeg','png','webp'],
     showAdvancedOptions: false,
     cropping: false,
@@ -313,6 +312,7 @@ $('#uploadArea').addEventListener('click', () => {
     }
   }, (error, result) => {
     if (error) { toast('Upload error: ' + error.message); return; }
+
     if (result.event === 'success') {
       const info = result.info;
       currentUpload = {
@@ -322,15 +322,22 @@ $('#uploadArea').addEventListener('click', () => {
         height: info.height,
         format: info.format
       };
+
+      // Add to upload queue
       addToQueue(currentUpload);
+
+      // Show metadata form
       $('#metaForm').classList.add('is-active');
       toast('Photo uploaded! Fill in the details below.');
     }
   });
+
   widget.open();
 });
 
+/* ── Upload Queue ── */
 const uploadedItems = [];
+
 function addToQueue(item) {
   uploadedItems.push({ ...item, saved: false });
   renderQueue();
@@ -356,14 +363,23 @@ window.editQueueItem = function(index) {
   window.scrollTo({ top: $('#metaForm').offsetTop - 20, behavior: 'smooth' });
 };
 
+/* ══════════════════════════════════════════════════════════════
+   CLOUDINARY URL HELPERS
+   ══════════════════════════════════════════════════════════════ */
 function cloudinaryThumb(url, w, h) {
+  // Insert transformation before /upload/ or /v1/
   return url.replace('/upload/', `/upload/c_fill,w_${w},h_${h},q_auto,f_auto/`);
 }
 
+/* ══════════════════════════════════════════════════════════════
+   SAVE METADATA TO GOOGLE SHEET
+   ══════════════════════════════════════════════════════════════ */
 $('#metaSave').addEventListener('click', async () => {
   if (!currentUpload) { toast('Upload a photo first'); return; }
+
   const category = $('#metaCategory').value;
   if (!category) { toast('Please select a category'); return; }
+
   const row = {
     image_url: currentUpload.url,
     category: category,
@@ -377,14 +393,17 @@ $('#metaSave').addEventListener('click', async () => {
     featured: $('#metaFeatured').value,
     sort_order: $('#metaSort').value
   };
+
   try {
     $('#metaSave').disabled = true;
     $('#metaSave').textContent = 'Saving...';
+
     const res = await fetch(CONFIG.sheetApiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain' }, // Apps Script requires this for CORS
       body: JSON.stringify({ action: 'add', data: row })
     });
+
     const json = await res.json();
     if (json.status === 'ok') {
       toast('Saved to portfolio!');
@@ -428,10 +447,15 @@ function clearForm() {
   currentUpload = null;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   GALLERY PREVIEW (read from Google Sheet)
+   ══════════════════════════════════════════════════════════════ */
 let galleryData = [];
+
 async function loadGallery() {
   const grid = $('#previewGrid');
   grid.innerHTML = '<p style="color:#888;">Loading portfolio...</p>';
+
   try {
     const res = await fetch(CONFIG.sheetApiUrl + '?action=get');
     const json = await res.json();
@@ -452,6 +476,7 @@ function renderGallery() {
     grid.innerHTML = '<p style="color:#888;">No portfolio items yet. Upload some photos!</p>';
     return;
   }
+
   grid.innerHTML = galleryData.map((item, i) => `
     <div class="preview-card">
       <img src="${cloudinaryThumb(item.image_url || '', 440, 360)}" alt="${item.alt_text || item.title || ''}" loading="lazy">
@@ -468,6 +493,7 @@ function renderGallery() {
 }
 
 $('#refreshGallery').addEventListener('click', loadGallery);
+
 window.deleteItem = async function(index) {
   if (!confirm('Remove this item from the portfolio?')) return;
   const item = galleryData[index];
@@ -475,7 +501,7 @@ window.deleteItem = async function(index) {
     const res = await fetch(CONFIG.sheetApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'delete', rowIndex: index + 2 })
+      body: JSON.stringify({ action: 'delete', rowIndex: index + 2 }) // +2 for header row + 1-indexed
     });
     const json = await res.json();
     if (json.status === 'ok') {
@@ -489,7 +515,11 @@ window.deleteItem = async function(index) {
   }
 };
 
+/* ══════════════════════════════════════════════════════════════
+   DRAG & DROP SUPPORT (on the upload area)
+   ══════════════════════════════════════════════════════════════ */
 const uploadArea = $('#uploadArea');
+
 uploadArea.addEventListener('dragover', e => {
   e.preventDefault();
   uploadArea.style.borderColor = '#EBBA98';
@@ -506,9 +536,12 @@ uploadArea.addEventListener('drop', e => {
   e.preventDefault();
   uploadArea.style.borderColor = '#ccc';
   uploadArea.style.background = '';
+
+  // Trigger the Cloudinary widget instead (can't bypass it for unsigned uploads)
   toast('Please use the upload dialog to select your photos');
   uploadArea.click();
 });
+
 </script>
 </body>
 </html>
