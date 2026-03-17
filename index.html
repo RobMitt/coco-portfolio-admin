@@ -222,14 +222,14 @@ function render(){
 }
 
 function renderGroup(name, items){
-  const visCount = items.filter(x=>x.show_in_gallery==='TRUE').length;
+  const visCount = items.filter(x=>isTrue(x.show_in_gallery)).length;
   return `<div class="series-group">
     <div class="series-header">${name} <span>${items.length} photos &bull; ${visCount} visible in gallery</span></div>
     <div class="photo-grid">${items.map(item=>{
       const i = item._idx;
       const sel = selected.has(i);
-      const vis = item.show_in_gallery==='TRUE';
-      const feat = item.featured==='TRUE';
+      const vis = isTrue(item.show_in_gallery);
+      const feat = isTrue(item.featured);
       const tags = (item.tags||'').split(',').filter(Boolean);
       return `<div class="photo-card ${sel?'selected':''}" onclick="toggle(${i})">
         <div class="check">${sel?'&#10003;':''}</div>
@@ -248,6 +248,9 @@ function renderGroup(name, items){
 }
 
 function thumb(url,w,h){return (url||'').replace('/upload/',`/upload/c_fill,w_${w},h_${h},q_auto,f_auto/`);}
+
+/* Helper: normalize boolean/string true/false from sheet */
+function isTrue(v){ return v===true||v==='TRUE'||v==='true'; }
 
 /* ── Selection ── */
 window.toggle = function(i){ if(selected.has(i)) selected.delete(i); else selected.add(i); render(); };
