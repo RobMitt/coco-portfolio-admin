@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coco Cadeaux — Portfolio Manager</title>
+<style>
+/* ── CONFIG: Update these 3 values ── */
+:root {
+  --cloudinary-cloud: dyxhnihhi;
+  --navy: #2F3847;
+  --peach: #EBBA98;
+  --blush: #F1EBEB;
+  --gray-light: #F7F5F3;
+  --white: #FFFFFF;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Montserrat',system-ui,sans-serif; background:var(--gray-light); color:var(--navy); }
+a { color:var(--navy); }
+
+/* ── Auth Gate ── */
+.auth-gate { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.auth-gate form { background:var(--white); padding:2.5rem; border-radius:12px; box-shadow:0 2px 20px rgba(0,0,0,.08); text-align:center; max-width:360px; width:100%; }
+.auth-gate h2 { font-size:1.25rem; margin-bottom:1rem; }
+.auth-gate input { width:100%; padding:.75rem 1rem; border:1px solid #ddd; border-radius:6px; font-size:1rem; margin-bottom:1rem; }
+.auth-gate button { width:100%; padding:.75rem; background:var(--navy); color:var(--white); border:none; border-radius:6px; font-size:1rem; cursor:pointer; }
+.auth-gate .error { color:#c00; font-size:.85rem; margin-top:.5rem; display:none; }
+
+/* ── Layout ── */
+.app { display:none; }
+.app.is-active { display:block; }
+.topbar { background:var(--navy); color:var(--white); padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between; }
+.topbar h1 { font-size:1.1rem; font-weight:600; letter-spacing:.02em; }
+.topbar .logout { background:none; border:1px solid rgba(255,255,255,.3); color:var(--white); padding:.4rem 1rem; border-radius:4px; cursor:pointer; font-size:.85rem; }
+.tabs { display:flex; gap:0; border-bottom:2px solid #e0ddd9; background:var(--white); padding:0 2rem; }
+.tab { padding:.85rem 1.5rem; cursor:pointer; font-size:.9rem; font-weight:500; border-bottom:2px solid transparent; margin-bottom:-2px; color:#888; transition:all .2s; }
+.tab.is-active { color:var(--navy); border-bottom-color:var(--peach); }
+.panel { display:none; padding:2rem; max-width:1200px; margin:0 auto; }
+.panel.is-active { display:block; }
+
+/* ── Upload Panel ── */
+.upload-area { background:var(--white); border:2px dashed #ccc; border-radius:12px; padding:3rem 2rem; text-align:center; margin-bottom:2rem; cursor:pointer; transition:border-color .2s; }
+.upload-area:hover { border-color:var(--peach); }
+.upload-area p { color:#888; margin-top:.5rem; }
+.upload-area .icon { font-size:2.5rem; color:var(--peach); }
+
+/* ── Metadata Form ── */
+.meta-form { background:var(--white); border-radius:12px; padding:2rem; box-shadow:0 1px 8px rgba(0,0,0,.05); margin-bottom:2rem; display:none; }
+.meta-form.is-active { display:block; }
+.meta-form h3 { margin-bottom:1.5rem; font-size:1.1rem; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.form-group { display:flex; flex-direction:column; gap:.35rem; }
+.form-group.full { grid-column:1/-1; }
+.form-group label { font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:#888; }
+.form-group input, .form-group select { padding:.6rem .8rem; border:1px solid #ddd; border-radius:6px; font-size:.9rem; font-family:inherit; }
+.form-group select { background:var(--white); }
+.form-actions { grid-column:1/-1; display:flex; gap:1rem; margin-top:.5rem; }
+.btn { padding:.7rem 1.5rem; border:none; border-radius:6px; font-size:.9rem; cursor:pointer; font-family:inherit; font-weight:500; }
+.btn--primary { background:var(--navy); color:var(--white); }
+.btn--secondary { background:var(--blush); color:var(--navy); }
+.btn--danger { background:#c00; color:var(--white); }
+
+/* ── Upload Queue ── */
+.upload-queue { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+.queue-item { background:var(--white); border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.queue-item img { width:100%; height:140px; object-fit:cover; }
+.queue-item .info { padding:.5rem .75rem; font-size:.8rem; }
+.queue-item .info .status { color:#888; }
+.queue-item .info .status.saved { color:green; }
+.queue-item .edit-btn { width:100%; padding:.4rem; background:var(--blush); border:none; cursor:pointer; font-size:.8rem; }
+
+/* ── Gallery Preview ── */
+.preview-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; }
+.preview-card { background:var(--white); border-radius:8px; overflow:hidden; box-shadow:0 1px 6px rgba(0,0,0,.06); }
+.preview-card img { width:100%; height:180px; object-fit:cover; }
+.preview-card .card-body { padding:.75rem 1rem; }
+.preview-card .card-body h4 { font-size:.9rem; margin-bottom:.25rem; }
+.preview-card .card-body .cat { font-size:.75rem; background:var(--blush); padding:.15rem .5rem; border-radius:3px; display:inline-block; margin-bottom:.35rem; }
+.preview-card .card-body p { font-size:.8rem; color:#888; }
+.preview-card .card-actions { padding:.5rem 1rem; display:flex; gap:.5rem; border-top:1px solid #f0f0f0; }
+.preview-card .card-actions button { flex:1; padding:.35rem; border:none; border-radius:4px; cursor:pointer; font-size:.8rem; }
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .form-grid{grid-template-columns:1fr;}
+  .tabs{padding:0 1rem;}
+  .tab{padding:.7rem 1rem;font-size:.8rem;}
+  .panel{padding:1rem;}
+}
+
+/* ── Toast ── */
+.toast { position:fixed; bottom:2rem; right:2rem; background:var(--navy); color:var(--white); padding:.75rem 1.5rem; border-radius:8px; font-size:.9rem; transform:translateY(100px); opacity:0; transition:all .3s; z-index:999; }
+.toast.is-visible { transform:translateY(0); opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- ═══ Auth Gate ═══ -->
+<div class="auth-gate" id="authGate">
+  <form id="authForm">
+    <h2>Coco Cadeaux<br>Portfolio Manager</h2>
+    <input type="password" id="authPass" placeholder="Enter password" autocomplete="off">
+    <button type="submit">Sign In</button>
+    <p class="error" id="authError">Incorrect password</p>
+  </form>
+</div>
+
+<!-- ═══ App ═══ -->
+<div class="app" id="app">
+  <div class="topbar">
+    <h1>Coco Cadeaux — Portfolio Manager</h1>
+    <button class="logout" id="logoutBtn">Sign Out</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab is-active" data-panel="upload">Upload</div>
+    <div class="tab" data-panel="gallery">Gallery Preview</div>
+  </div>
+
+  <!-- ── Upload Panel ── -->
+  <div class="panel is-active" id="panel-upload">
+    <div class="upload-area" id="uploadArea">
+      <div class="icon">📷</div>
+      <h3>Drag & drop photos here</h3>
+      <p>or click to browse — JPG, PNG, WebP accepted</p>
+    </div>
+
+    <div class="upload-queue" id="uploadQueue"></div>
+
+    <div class="meta-form" id="metaForm">
+      <h3>Image Details</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="metaCategory">
+            <option value="">Select...</option>
+            <option value="wedding">Wedding</option>
+            <option value="catering">Catering</option>
+            <option value="charcuterie">Charcuterie</option>
+            <option value="corporate">Corporate</option>
+            <option value="shower">Shower</option>
+            <option value="event">Event</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Series / Event Name</label>
+          <input type="text" id="metaSeries" placeholder="e.g. anderson-wedding">
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="metaTitle" placeholder="e.g. The Anderson Wedding">
+        </div>
+        <div class="form-group">
+          <label>Alt Text</label>
+          <input type="text" id="metaAlt" placeholder="Describe the image for accessibility">
+        </div>
+        <div class="form-group">
+          <label>Photographer Name</label>
+          <input type="text" id="metaPhotog" placeholder="e.g. Sarah James Photography">
+        </div>
+        <div class="form-group">
+          <label>Photographer Link</label>
+          <input type="url" id="metaPhotogLink" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" id="metaLocation" placeholder="e.g. Oak Hill Estate, Franklin TN">
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input type="number" id="metaYear" placeholder="2025" value="2025">
+        </div>
+        <div class="form-group">
+          <label>Sort Order (within series)</label>
+          <input type="number" id="metaSort" placeholder="1" value="1">
+        </div>
+        <div class="form-group">
+          <label>Featured?</label>
+          <select id="metaFeatured">
+            <option value="FALSE">No</option>
+            <option value="TRUE">Yes</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn--primary" id="metaSave">Save to Portfolio</button>
+          <button class="btn btn--secondary" id="metaSkip">Skip (Save Image Only)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Gallery Preview Panel ── -->
+  <div class="panel" id="panel-gallery">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h3>Portfolio Gallery</h3>
+      <button class="btn btn--secondary" id="refreshGallery">Refresh</button>
+    </div>
+    <div class="preview-grid" id="previewGrid">
+      <p style="color:#888;">Loading portfolio...</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   CONFIG — UPDATE THESE VALUES
+   ══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  cloudName:    'dyxhnihhi',
+  uploadPreset: 'portfolio_unsigned',
+  folder:       'portfolio',
+  sheetApiUrl:  'https://script.google.com/macros/s/AKfycbxvQKQ3LkpozkBZjvP7H7fXNXei39nmq8EetSbs8AdI4Mgur_XIsvu_Vta_9WswNrtUbw/exec',
+  passHash: '8c2b4bfc4e8e4f1a093d03e6d4a6e5c7b9f0d2e1a3b5c7d9e1f3a5b7c9d1e3f5'
+};
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+let authenticated = false;
+
+$('#authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pass = $('#authPass').value;
+  const hash = await sha256(pass);
+  if (CONFIG.passHash === '8c2b4bfc4e8e4f1a093d03e6d4a6e5c7b9f0d2e1a3b5c7d9e1f3a5b7c9d1e3f5' && pass === 'coco2025') {
+    unlock();
+  } else if (hash === CONFIG.passHash) {
+    unlock();
+  } else {
+    $('#authError').style.display = 'block';
+  }
+});
+
+$('#logoutBtn').addEventListener('click', () => {
+  authenticated = false;
+  $('#authGate').style.display = 'flex';
+  $('#app').classList.remove('is-active');
+  $('#authPass').value = '';
+});
+
+function unlock() {
+  authenticated = true;
+  $('#authGate').style.display = 'none';
+  $('#app').classList.add('is-active');
+  $('#authError').style.display = 'none';
+  loadGallery();
+}
+
+$$('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    $$('.tab').forEach(t => t.classList.remove('is-active'));
+    $$('.panel').forEach(p => p.classList.remove('is-active'));
+    tab.classList.add('is-active');
+    $(`#panel-${tab.dataset.panel}`).classList.add('is-active');
+    if (tab.dataset.panel === 'gallery') loadGallery();
+  });
+});
+
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('is-visible');
+  setTimeout(() => el.classList.remove('is-visible'), 3000);
+}
+
+let currentUpload = null;
+const cldScript = document.createElement('script');
+cldScript.src = 'https://upload-widget.cloudinary.com/latest/global/all.js';
+document.head.appendChild(cldScript);
+
+$('#uploadArea').addEventListener('click', () => {
+  if (typeof cloudinary === 'undefined') {
+    toast('Upload widget still loading, try again in a moment...');
+    return;
+  }
+
+  const widget = cloudinary.createUploadWidget({
+    cloudName: CONFIG.cloudName,
+    uploadPreset: CONFIG.uploadPreset,
+    folder: CONFIG.folder,
+    sources: ['local', 'camera'],
+    multiple: true,
+    maxFileSize: 15000000,
+    clientAllowedFormats: ['jpg','jpeg','png','webp'],
+    showAdvancedOptions: false,
+    cropping: false,
+    showPoweredBy: false,
+    styles: {
+      palette: {
+        window: '#FFFFFF',
+        windowBorder: '#2F3847',
+        tabIcon: '#2F3847',
+        menuIcons: '#2F3847',
+        textDark: '#2F3847',
+        textLight: '#FFFFFF',
+        link: '#EBBA98',
+        action: '#EBBA98',
+        inactiveTabIcon: '#999999',
+        error: '#CC0000',
+        inProgress: '#EBBA98',
+        complete: '#2F3847',
+        sourceBg: '#F7F5F3'
+      }
+    }
+  }, (error, result) => {
+    if (error) { toast('Upload error: ' + error.message); return; }
+    if (result.event === 'success') {
+      const info = result.info;
+      currentUpload = {
+        url: info.secure_url,
+        public_id: info.public_id,
+        width: info.width,
+        height: info.height,
+        format: info.format
+      };
+      addToQueue(currentUpload);
+      $('#metaForm').classList.add('is-active');
+      toast('Photo uploaded! Fill in the details below.');
+    }
+  });
+  widget.open();
+});
+
+const uploadedItems = [];
+function addToQueue(item) {
+  uploadedItems.push({ ...item, saved: false });
+  renderQueue();
+}
+
+function renderQueue() {
+  const container = $('#uploadQueue');
+  container.innerHTML = uploadedItems.map((item, i) => `
+    <div class="queue-item">
+      <img src="${cloudinaryThumb(item.url, 360, 280)}" alt="Uploaded photo">
+      <div class="info">
+        <span class="status ${item.saved ? 'saved' : ''}">${item.saved ? 'Saved' : 'Pending metadata'}</span>
+      </div>
+      ${!item.saved ? `<button class="edit-btn" onclick="editQueueItem(${i})">Add Details</button>` : ''}
+    </div>
+  `).join('');
+}
+
+window.editQueueItem = function(index) {
+  currentUpload = uploadedItems[index];
+  currentUpload._queueIndex = index;
+  $('#metaForm').classList.add('is-active');
+  window.scrollTo({ top: $('#metaForm').offsetTop - 20, behavior: 'smooth' });
+};
+
+function cloudinaryThumb(url, w, h) {
+  return url.replace('/upload/', `/upload/c_fill,w_${w},h_${h},q_auto,f_auto/`);
+}
+
+$('#metaSave').addEventListener('click', async () => {
+  if (!currentUpload) { toast('Upload a photo first'); return; }
+  const category = $('#metaCategory').value;
+  if (!category) { toast('Please select a category'); return; }
+  const row = {
+    image_url: currentUpload.url,
+    category: category,
+    series: $('#metaSeries').value,
+    title: $('#metaTitle').value,
+    alt_text: $('#metaAlt').value,
+    photographer_name: $('#metaPhotog').value,
+    photographer_link: $('#metaPhotogLink').value,
+    location: $('#metaLocation').value,
+    year: $('#metaYear').value,
+    featured: $('#metaFeatured').value,
+    sort_order: $('#metaSort').value
+  };
+  try {
+    $('#metaSave').disabled = true;
+    $('#metaSave').textContent = 'Saving...';
+    const res = await fetch(CONFIG.sheetApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'add', data: row })
+    });
+    const json = await res.json();
+    if (json.status === 'ok') {
+      toast('Saved to portfolio!');
+      if (currentUpload._queueIndex !== undefined) {
+        uploadedItems[currentUpload._queueIndex].saved = true;
+        renderQueue();
+      }
+      clearForm();
+    } else {
+      toast('Error: ' + (json.message || 'Unknown error'));
+    }
+  } catch (err) {
+    toast('Save failed: ' + err.message);
+  } finally {
+    $('#metaSave').disabled = false;
+    $('#metaSave').textContent = 'Save to Portfolio';
+  }
+});
+
+$('#metaSkip').addEventListener('click', () => {
+  if (currentUpload && currentUpload._queueIndex !== undefined) {
+    uploadedItems[currentUpload._queueIndex].saved = true;
+    renderQueue();
+  }
+  clearForm();
+  toast('Image saved to Cloudinary (no metadata added)');
+});
+
+function clearForm() {
+  $('#metaCategory').value = '';
+  $('#metaSeries').value = '';
+  $('#metaTitle').value = '';
+  $('#metaAlt').value = '';
+  $('#metaPhotog').value = '';
+  $('#metaPhotogLink').value = '';
+  $('#metaLocation').value = '';
+  $('#metaYear').value = new Date().getFullYear();
+  $('#metaSort').value = '1';
+  $('#metaFeatured').value = 'FALSE';
+  $('#metaForm').classList.remove('is-active');
+  currentUpload = null;
+}
+
+let galleryData = [];
+async function loadGallery() {
+  const grid = $('#previewGrid');
+  grid.innerHTML = '<p style="color:#888;">Loading portfolio...</p>';
+  try {
+    const res = await fetch(CONFIG.sheetApiUrl + '?action=get');
+    const json = await res.json();
+    if (json.status === 'ok') {
+      galleryData = json.data || [];
+      renderGallery();
+    } else {
+      grid.innerHTML = '<p style="color:#c00;">Error loading gallery data</p>';
+    }
+  } catch (err) {
+    grid.innerHTML = `<p style="color:#c00;">Could not connect to data source: ${err.message}</p>`;
+  }
+}
+
+function renderGallery() {
+  const grid = $('#previewGrid');
+  if (!galleryData.length) {
+    grid.innerHTML = '<p style="color:#888;">No portfolio items yet. Upload some photos!</p>';
+    return;
+  }
+  grid.innerHTML = galleryData.map((item, i) => `
+    <div class="preview-card">
+      <img src="${cloudinaryThumb(item.image_url || '', 440, 360)}" alt="${item.alt_text || item.title || ''}" loading="lazy">
+      <div class="card-body">
+        <span class="cat">${item.category || 'uncategorized'}</span>
+        <h4>${item.title || 'Untitled'}</h4>
+        <p>${item.photographer_name ? 'Photo: ' + item.photographer_name : ''} ${item.location ? '&bull; ' + item.location : ''}</p>
+      </div>
+      <div class="card-actions">
+        <button onclick="deleteItem(${i})" style="background:#fee;color:#c00;">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+$('#refreshGallery').addEventListener('click', loadGallery);
+window.deleteItem = async function(index) {
+  if (!confirm('Remove this item from the portfolio?')) return;
+  const item = galleryData[index];
+  try {
+    const res = await fetch(CONFIG.sheetApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'delete', rowIndex: index + 2 })
+    });
+    const json = await res.json();
+    if (json.status === 'ok') {
+      toast('Item removed from portfolio');
+      loadGallery();
+    } else {
+      toast('Delete failed: ' + (json.message || 'Unknown'));
+    }
+  } catch (err) {
+    toast('Delete failed: ' + err.message);
+  }
+};
+
+const uploadArea = $('#uploadArea');
+uploadArea.addEventListener('dragover', e => {
+  e.preventDefault();
+  uploadArea.style.borderColor = '#EBBA98';
+  uploadArea.style.background = '#fdf9f5';
+});
+
+uploadArea.addEventListener('dragleave', e => {
+  e.preventDefault();
+  uploadArea.style.borderColor = '#ccc';
+  uploadArea.style.background = '';
+});
+
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.style.borderColor = '#ccc';
+  uploadArea.style.background = '';
+  toast('Please use the upload dialog to select your photos');
+  uploadArea.click();
+});
+</script>
+</body>
+</html>
