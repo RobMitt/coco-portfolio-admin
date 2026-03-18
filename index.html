@@ -9,8 +9,10 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Montserrat',system-ui,sans-serif;background:var(--gray-light);color:var(--navy);}
 
-.topbar{background:var(--navy);color:var(--white);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+.sticky-top{position:sticky;top:0;z-index:100;}
+.topbar{background:var(--navy);color:var(--white);padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;}
 .topbar h1{font-size:1.1rem;font-weight:600;}
+.controls{background:var(--white);padding:.75rem 2rem;border-bottom:1px solid #e0ddd9;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.06);}
 
 .main{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;}
 
@@ -20,11 +22,11 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:var(--gray-light);
 .upload-area .icon{font-size:2.5rem;color:var(--peach);}
 .upload-area p{color:#888;margin-top:.5rem;font-size:.9rem;}
 
-/* Toolbar */
-.toolbar{display:flex;background:var(--navy);color:var(--white);padding:.6rem 1.2rem;border-radius:8px;margin-bottom:1rem;align-items:center;gap:.75rem;flex-wrap:wrap;}
-.toolbar span{font-size:.85rem;}
-.toolbar .btn{font-size:.8rem;padding:.4rem .8rem;}
-.toolbar .btn--light{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);}
+/* Toolbar (inside sticky controls) */
+.toolbar{display:none;align-items:center;gap:.5rem;flex-wrap:wrap;margin-left:auto;}
+.toolbar.is-active{display:flex;}
+.toolbar span{font-size:.8rem;color:var(--navy);font-weight:600;}
+.toolbar .btn--light{background:var(--blush);color:var(--navy);border:1px solid #ddd;}
 
 /* Buttons */
 .btn{padding:.6rem 1.2rem;border:none;border-radius:6px;font-size:.85rem;cursor:pointer;font-family:inherit;font-weight:500;}
@@ -77,24 +79,27 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:var(--gray-light);
 </head>
 <body>
 
-<div class="topbar">
-  <h1>Coco Cadeaux — Portfolio Manager</h1>
-  <button class="btn btn--sm" onclick="loadGallery()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">Refresh</button>
+<div class="sticky-top">
+  <div class="topbar">
+    <h1>Coco Cadeaux — Portfolio Manager</h1>
+    <button class="btn btn--sm" onclick="loadGallery()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">Refresh</button>
+  </div>
+  <div class="controls">
+    <button class="btn btn--primary btn--sm" id="uploadBtn">&#128247; Upload Photos</button>
+    <div class="toolbar" id="toolbar">
+      <span id="selCount">0 selected</span>
+      <button class="btn btn--sm btn--light" onclick="selectAll()">Select All</button>
+      <button class="btn btn--sm btn--light" onclick="deselectAll()">Deselect</button>
+      <button class="btn btn--sm btn--primary" onclick="openBulkEdit()">Bulk Edit</button>
+      <button class="btn btn--sm" onclick="bulkToggleGallery(true)" style="background:#d4edda;color:#155724;border:none;">Show</button>
+      <button class="btn btn--sm" onclick="bulkToggleGallery(false)" style="background:#f8d7da;color:#721c24;border:none;">Hide</button>
+      <button class="btn btn--sm btn--danger" onclick="bulkDelete()">Delete</button>
+      <button class="btn btn--sm" onclick="copySelectedUrls()" style="background:var(--navy);color:#fff;border:none;">Copy URLs</button>
+    </div>
+  </div>
 </div>
 
 <div class="main">
-  <button class="btn btn--primary" id="uploadBtn" style="padding:.8rem 2rem;font-size:1rem;margin-bottom:1.5rem;">&#128247; Upload Photos</button>
-
-  <div class="toolbar" id="toolbar" style="display:none;">
-    <span id="selCount">0 selected</span>
-    <button class="btn btn--light" onclick="selectAll()">Select All</button>
-    <button class="btn btn--light" onclick="deselectAll()">Deselect</button>
-    <button class="btn btn--primary btn--sm" onclick="openBulkEdit()">Bulk Edit</button>
-    <button class="btn btn--sm" onclick="bulkToggleGallery(true)" style="background:#d4edda;color:#155724;border:none;">Show in Gallery</button>
-    <button class="btn btn--sm" onclick="bulkToggleGallery(false)" style="background:#f8d7da;color:#721c24;border:none;">Hide from Gallery</button>
-    <button class="btn btn--sm btn--danger" onclick="bulkDelete()">Delete Selected</button>
-    <button class="btn btn--sm" onclick="copySelectedUrls()" style="background:var(--navy);color:#fff;border:none;">Copy URLs</button>
-  </div>
 
   <div class="edit-form" id="editForm">
     <h3 id="editTitle">Edit Details</h3>
@@ -290,8 +295,8 @@ window.deselectAll = function(){ selected.clear(); render(); };
 
 function updateToolbar(){
   const tb=$('#toolbar');
-  if(data.length){tb.style.display='flex';$('#selCount').textContent=selected.size+' selected';}
-  else tb.style.display='none';
+  if(data.length){tb.classList.add('is-active');$('#selCount').textContent=selected.size+' selected';}
+  else tb.classList.remove('is-active');
 }
 
 /* ── Quick Gallery Toggle ── */
