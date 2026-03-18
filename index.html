@@ -234,7 +234,7 @@ function render(){
 function renderGroup(name, items){
   const visCount = items.filter(x=>isTrue(x.show_in_gallery)).length;
   return `<div class="series-group">
-    <div class="series-header">${name} <span>${items.length} photos &bull; ${visCount} visible in gallery</span></div>
+    <div class="series-header">${name} <span>${items.length} photos &bull; ${visCount} visible</span> <button class="btn btn--sm btn--secondary" onclick="event.stopPropagation();selectSeries('${name.replace(/'/g,"\\'")}')" style="font-size:.7rem;padding:2px 8px;">Select All in Series</button></div>
     <div class="photo-grid">${items.map(item=>{
       const i = item._idx;
       const sel = selected.has(i);
@@ -282,6 +282,10 @@ function isTrue(v){ return v===true||v==='TRUE'||v==='true'; }
 /* ── Selection ── */
 window.toggle = function(i){ if(selected.has(i)) selected.delete(i); else selected.add(i); render(); };
 window.selectAll = function(){ data.forEach((_,i)=>selected.add(i)); render(); };
+window.selectSeries = function(name){
+  data.forEach((item,i)=>{ if((item.series||'')===(name==='Untagged / No Series'?'':name)) selected.add(i); });
+  render();
+};
 window.deselectAll = function(){ selected.clear(); render(); };
 
 function updateToolbar(){
