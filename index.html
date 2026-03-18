@@ -83,11 +83,7 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:var(--gray-light);
 </div>
 
 <div class="main">
-  <div class="upload-area" id="uploadArea">
-    <div class="icon">&#128247;</div>
-    <h3>Upload Photos</h3>
-    <p>Click to browse or drag & drop — JPG, PNG, WebP</p>
-  </div>
+  <button class="btn btn--primary" id="uploadBtn" style="padding:.8rem 2rem;font-size:1rem;margin-bottom:1.5rem;">&#128247; Upload Photos</button>
 
   <div class="toolbar" id="toolbar" style="display:none;">
     <span id="selCount">0 selected</span>
@@ -153,8 +149,17 @@ const cld = document.createElement('script');
 cld.src = 'https://upload-widget.cloudinary.com/latest/global/all.js';
 document.head.appendChild(cld);
 
-$('#uploadArea').addEventListener('click', ()=>{
-  if(typeof cloudinary==='undefined'){toast('Widget loading...');return;}
+// Auto-generate batch series name for each upload session
+function makeBatchName(){
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  return 'batch-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes());
+}
+
+$('#uploadBtn').addEventListener('click', ()=>{
+  if(typeof cloudinary==='undefined'){toast('Widget loading, try again...');return;}
+  const batchSeries = makeBatchName();
+  let uploadCount = 0;
   const w = cloudinary.createUploadWidget({
     cloudName:CONFIG.cloudName, uploadPreset:CONFIG.uploadPreset, folder:CONFIG.folder,
     sources:['local','camera'], multiple:true, maxFileSize:15000000,
@@ -163,11 +168,14 @@ $('#uploadArea').addEventListener('click', ()=>{
   }, (err,result)=>{
     if(err){toast('Upload error');return;}
     if(result.event==='success'){
+      uploadCount++;
       const info=result.info;
-      // Auto-save with defaults (hidden from gallery)
       fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},
-        body:JSON.stringify({action:'add',data:{image_url:info.secure_url,tags:'',series:'',title:'',alt_text:'',photographer_name:'',photographer_link:'',location:'',year:new Date().getFullYear().toString(),featured:'FALSE',sort_order:'1',show_in_gallery:'FALSE'}})
-      }).then(r=>r.json()).then(j=>{if(j.status==='ok')toast('Photo uploaded (hidden by default)');});
+        body:JSON.stringify({action:'add',data:{image_url:info.secure_url,tags:'',series:batchSeries,title:'',alt_text:'',photographer_name:'',photographer_link:'',location:'',year:new Date().getFullYear().toString(),featured:'FALSE',sort_order:String(uploadCount),show_in_gallery:'FALSE'}})
+      }).then(r=>r.json()).then(j=>{
+        if(j.status==='ok') toast(uploadCount+' photo(s) uploaded → series: '+batchSeries);
+        else toast('Save error: '+(j.message||'unknown'));
+      }).catch(e=>toast('Save error: '+e.message));
     }
     if(result.event==='close') loadGallery();
   });
@@ -266,16 +274,27 @@ function updateToolbar(){
 /* ── Quick Gallery Toggle ── */
 window.bulkToggleGallery = async function(show){
   if(!selected.size){toast('Select photos first');return;}
+  // Immediate UI feedback
+  const total=selected.size;
+  toast(`Updating ${total} photo(s)...`);
+  // Optimistic UI update — immediately flip badges
+  for(const idx of selected){
+    data[idx].show_in_gallery=show?'TRUE':'FALSE';
+  }
+  render(); // instant visual feedback
+  // Now save to sheet in background
   let count=0;
+  const promises=[];
   for(const idx of selected){
     const item=data[idx];
-    const row={image_url:item.image_url,tags:item.tags||'',series:item.series||'',title:item.title||'',alt_text:item.alt_text||'',photographer_name:item.photographer_name||'',photographer_link:item.photographer_link||'',location:item.location||'',year:item.year||'',featured:item.featured||'FALSE',sort_order:item.sort_order||'1',show_in_gallery:show?'TRUE':'FALSE'};
-    try{
-      const res=await fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})});
-      const j=await res.json(); if(j.status==='ok')count++;
-    }catch(e){}
+    const row={image_url:item.image_url,tags:item.tags||'',series:item.series||'',title:item.title||'',alt_text:item.alt_text||'',photographer_name:item.photographer_name||'',photographer_link:item.photographer_link||'',location:item.location||'',year:item.year||'',featured:isTrue(item.featured)?'TRUE':'FALSE',sort_order:item.sort_order||'1',show_in_gallery:show?'TRUE':'FALSE'};
+    promises.push(
+      fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})})
+        .then(r=>r.json()).then(j=>{if(j.status==='ok')count++;}).catch(()=>{})
+    );
   }
-  toast(`${count} photo(s) ${show?'shown':'hidden'}`);
+  await Promise.all(promises);
+  toast(`${count}/${total} photo(s) ${show?'shown':'hidden'}`);
   selected.clear(); loadGallery();
 };
 
@@ -300,8 +319,10 @@ window.closeEdit = function(){ $('#editForm').classList.remove('is-active'); edi
 window.saveEdits = async function(){
   const tags = Array.from(editTags).join(',');
   const indices = editMode==='single'?[editIdx]:Array.from(selected);
-  $('#saveBtn').disabled=true; $('#saveBtn').textContent='Saving...';
+  const total=indices.length;
+  $('#saveBtn').disabled=true; $('#saveBtn').textContent=`Saving ${total}...`;
   let count=0;
+  const promises=[];
   for(const idx of indices){
     const item=data[idx];
     const row={
@@ -314,16 +335,17 @@ window.saveEdits = async function(){
       photographer_link: $('#fPhotogLink').value||item.photographer_link||'',
       location: $('#fLocation').value||item.location||'',
       year: $('#fYear').value||item.year||'',
-      featured: $('#fFeatured').value||item.featured||'FALSE',
+      featured: $('#fFeatured').value||(isTrue(item.featured)?'TRUE':'FALSE'),
       sort_order: $('#fSort').value||item.sort_order||'1',
-      show_in_gallery: $('#fShowGallery').value||item.show_in_gallery||'FALSE'
+      show_in_gallery: $('#fShowGallery').value||(isTrue(item.show_in_gallery)?'TRUE':'FALSE')
     };
-    try{
-      const res=await fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})});
-      const j=await res.json(); if(j.status==='ok')count++;
-    }catch(e){}
+    promises.push(
+      fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})})
+        .then(r=>r.json()).then(j=>{if(j.status==='ok')count++;}).catch(()=>{})
+    );
   }
-  toast(`Updated ${count} photo(s)`);
+  await Promise.all(promises);
+  toast(`Updated ${count}/${total} photo(s)`);
   $('#saveBtn').disabled=false; $('#saveBtn').textContent='Save Changes';
   closeEdit(); selected.clear(); loadGallery();
 };
