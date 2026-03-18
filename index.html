@@ -92,6 +92,7 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:var(--gray-light);
     <button class="btn btn--primary btn--sm" onclick="openBulkEdit()">Bulk Edit</button>
     <button class="btn btn--sm" onclick="bulkToggleGallery(true)" style="background:#d4edda;color:#155724;border:none;">Show in Gallery</button>
     <button class="btn btn--sm" onclick="bulkToggleGallery(false)" style="background:#f8d7da;color:#721c24;border:none;">Hide from Gallery</button>
+    <button class="btn btn--sm btn--danger" onclick="bulkDelete()">Delete Selected</button>
   </div>
 
   <div class="edit-form" id="editForm">
@@ -295,6 +296,25 @@ window.bulkToggleGallery = async function(show){
   }
   await Promise.all(promises);
   toast(`${count}/${total} photo(s) ${show?'shown':'hidden'}`);
+  selected.clear(); loadGallery();
+};
+
+/* ── Bulk Delete ── */
+window.bulkDelete = async function(){
+  if(!selected.size){toast('Select photos first');return;}
+  if(!confirm(`Delete ${selected.size} photo(s)? This cannot be undone.`))return;
+  const total=selected.size;
+  toast(`Deleting ${total} photo(s)...`);
+  // Delete from highest index first so row numbers don't shift
+  const indices=Array.from(selected).sort((a,b)=>b-a);
+  let count=0;
+  for(const idx of indices){
+    try{
+      const res=await fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete',rowIndex:idx+2})});
+      const j=await res.json();if(j.status==='ok')count++;
+    }catch(e){}
+  }
+  toast(`Deleted ${count}/${total} photo(s)`);
   selected.clear(); loadGallery();
 };
 
