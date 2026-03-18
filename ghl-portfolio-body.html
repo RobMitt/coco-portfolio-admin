@@ -1,0 +1,307 @@
+<!-- Coco Cadeaux — Portfolio Page Body (Dynamic Gallery) -->
+
+<!-- Hero Section -->
+<section class="cc-hero cc-hero--short" style="background-image:url('[PORTFOLIO_HERO_IMG_URL]');">
+  <div class="cc-hero__overlay"></div>
+  <div class="cc-hero__content">
+    <h1>Our Portfolio</h1>
+    <p class="subtitle">A glimpse of the celebrations we've had the honor to create</p>
+  </div>
+</section>
+
+<!-- Portfolio Gallery Section -->
+<section class="cc-section" style="background:var(--gray-light);padding:var(--sp-2xl) 0;">
+  <div class="cc-container">
+    <!-- Filter Buttons (generated dynamically from data) -->
+    <div class="cc-gallery-filters" id="galleryFilters"></div>
+    <!-- 3-Column Grid -->
+    <div class="cc-gallery-grid" id="galleryGrid">
+      <div class="cc-gallery-loading">Loading portfolio&hellip;</div>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div class="cc-lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <button class="cc-lightbox__close" id="lbClose">&times;</button>
+  <button class="cc-lightbox__nav cc-lightbox__nav--prev" id="lbPrev">&lsaquo;</button>
+  <button class="cc-lightbox__nav cc-lightbox__nav--next" id="lbNext">&rsaquo;</button>
+  <div class="cc-lightbox__img-wrap"><img class="cc-lightbox__img" id="lbImg" src="" alt=""></div>
+  <div class="cc-lightbox__info" id="lbInfo">
+    <div class="cc-lightbox__title" id="lbTitle"></div>
+    <div class="cc-lightbox__credit" id="lbCredit"></div>
+    <div class="cc-lightbox__counter" id="lbCounter"></div>
+  </div>
+</div>
+
+<!-- CTA Band -->
+<section class="cc-section cc-section--cta" style="background:var(--navy);padding:var(--sp-xl) 0;">
+  <div class="cc-container" style="text-align:center;color:var(--white);">
+    <h2 style="font-family:var(--font-h1);color:var(--peach);margin-bottom:.5rem;">Ready to Start Planning?</h2>
+    <p style="max-width:500px;margin:0 auto 1.5rem;opacity:.85;">
+      We're ready to bring your dream event to life. Reach out and let's begin.
+    </p>
+    <div class="cc-form-embed">
+      <iframe src="https://events.cococadeaux.com/widget/form/2R2MRBV8wVoZBDGBGTzr" style="width:100%;border:none;border-radius:4px" scrolling="no" id="inline-2R2MRBV8wVoZBDGBGTzr" data-layout="{'id':'INLINE'}" data-trigger-type="alwaysShow" data-trigger-value="" data-activation-type="alwaysActivated" data-activation-value="" data-deactivation-type="neverDeactivate" data-deactivation-value="" data-form-name="Website Lead Capture Embed" data-height="" data-layout-iframe-id="inline-2R2MRBV8wVoZBDGBGTzr" data-form-id="2R2MRBV8wVoZBDGBGTzr" title="Website Lead Capture Embed"></iframe>
+      <script src="https://events.cococadeaux.com/js/form_embed.js"></script>
+    </div>
+  </div>
+</section>
+
+<style>
+.cc-gallery-filters{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:var(--sp-lg);padding:0 10%;}
+.cc-filter-btn{background:var(--white);border:1px solid var(--gray-mid);color:var(--navy);padding:.5rem 1.25rem;border-radius:20px;font-family:var(--font-body);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .25s ease;}
+.cc-filter-btn:hover{border-color:var(--peach);color:var(--peach);}
+.cc-filter-btn.is-active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.cc-gallery-grid{display:flex;gap:12px;padding:0 10%;}
+.cc-gallery-col{flex:1;display:flex;flex-direction:column;gap:12px;}
+.cc-gallery-item{border-radius:4px;overflow:hidden;position:relative;cursor:pointer;transition:transform .3s ease,box-shadow .3s ease;}
+.cc-gallery-item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.12);}
+.cc-gallery-item img{width:100%;display:block;}
+.cc-gallery-item__overlay{position:absolute;bottom:0;left:0;right:0;padding:.75rem 1rem;background:linear-gradient(transparent,rgba(47,56,71,.7));color:var(--white);opacity:0;transition:opacity .3s ease;}
+.cc-gallery-item:hover .cc-gallery-item__overlay{opacity:1;}
+.cc-gallery-item__overlay h4{font-family:var(--font-h1);font-size:.95rem;margin:0 0 .15rem;}
+.cc-gallery-item__overlay span{font-size:.75rem;opacity:.8;}
+.cc-gallery-loading{text-align:center;padding:var(--sp-xl);color:var(--gray-mid);font-size:.95rem;}
+.cc-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;}
+.cc-lightbox.is-open{display:flex;}
+.cc-lightbox__close{position:absolute;top:1rem;right:1.5rem;background:none;border:none;color:var(--white);font-size:2.5rem;cursor:pointer;z-index:10;line-height:1;padding:.5rem;}
+.cc-lightbox__nav{position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--white);font-size:3rem;cursor:pointer;z-index:10;padding:1rem;opacity:.7;transition:opacity .2s;}
+.cc-lightbox__nav:hover{opacity:1;}
+.cc-lightbox__nav--prev{left:1rem;}
+.cc-lightbox__nav--next{right:1rem;}
+.cc-lightbox__img-wrap{max-width:90vw;max-height:80vh;display:flex;align-items:center;justify-content:center;}
+.cc-lightbox__img{max-width:100%;max-height:80vh;object-fit:contain;border-radius:2px;}
+.cc-lightbox__info{position:absolute;bottom:0;left:0;right:0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:flex-end;color:var(--white);font-size:.85rem;}
+.cc-lightbox__title{font-family:var(--font-h1);font-size:1.1rem;}
+.cc-lightbox__credit a{color:var(--peach);text-decoration:none;}
+.cc-lightbox__counter{opacity:.6;font-size:.8rem;}
+@media(max-width:1024px){.cc-gallery-grid{padding:0 5%;}.cc-gallery-filters{padding:0 5%;}}
+@media(max-width:600px){.cc-gallery-grid{flex-direction:column;padding:0 5%;}.cc-gallery-col{flex:none;}}
+</style>
+
+<script>
+(function(){
+  'use strict';
+
+  var SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAYPah-6g4gNONrxQSNHiXFPbTh4nwl89zRgOkR-X2NEn32_l72sAPZSViFbNOpdnSabBYR63yc7qs/pub?gid=0&single=true&output=csv';
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvQKQ3LkpozkBZjvP7H7fXNXei39nmq8EetSbs8AdI4Mgur_XIsvu_Vta_9WswNrtUbw/exec';
+
+  var allItems = [], filteredItems = [], currentFilter = 'all';
+  var lightboxIndex = -1, seriesItems = [];
+  var grid = document.getElementById('galleryGrid');
+  var lightbox = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lbImg');
+  var lbTitle = document.getElementById('lbTitle');
+  var lbCredit = document.getElementById('lbCredit');
+  var lbCounter = document.getElementById('lbCounter');
+
+  var ASPECTS = [{w:600,h:600},{w:600,h:400},{w:600,h:450},{w:600,h:800},{w:600,h:750},{w:600,h:600},{w:600,h:400},{w:600,h:800}];
+
+  function isTrue(v){ return v===true||v==='TRUE'||v==='true'||v===1||v==='1'; }
+
+  fetchPortfolioData();
+
+  function fetchPortfolioData(){
+    fetch(SHEET_CSV_URL).then(function(r){return r.text();}).then(function(csv){
+      allItems=parseCSV(csv);
+      if(allItems.length===0) throw new Error('empty');
+      initGallery();
+    }).catch(function(){
+      fetch(APPS_SCRIPT_URL+'?action=get').then(function(r){return r.json();}).then(function(j){
+        if(j.status==='ok'&&j.data){allItems=j.data;initGallery();}else showError();
+      }).catch(showError);
+    });
+  }
+
+  function parseCSV(csv){
+    var lines=csv.split('\n'); if(lines.length<2)return[];
+    var headers=parseLine(lines[0]),items=[];
+    for(var i=1;i<lines.length;i++){
+      if(!lines[i].trim())continue;
+      var vals=parseLine(lines[i]),obj={};
+      headers.forEach(function(h,j){obj[h.trim()]=(vals[j]||'').trim();});
+      if(obj.image_url)items.push(obj);
+    }
+    return items;
+  }
+  function parseLine(line){
+    var r=[],c='',q=false;
+    for(var i=0;i<line.length;i++){
+      var ch=line[i];
+      if(ch==='"'){if(q&&line[i+1]==='"'){c+='"';i++;}else q=!q;}
+      else if(ch===','&&!q){r.push(c);c='';}else c+=ch;
+    }
+    r.push(c);return r;
+  }
+
+  function showError(){grid.innerHTML='<div class="cc-gallery-loading">Unable to load portfolio.</div>';}
+
+  /* ── Dedup ── */
+  function dedup(items){
+    var seen={};return items.filter(function(x){if(!x.image_url||seen[x.image_url])return false;seen[x.image_url]=true;return true;});
+  }
+
+  /* ── Select max 30, at least 1 per series, only show_in_gallery ── */
+  function selectItems(items){
+    var MAX=30;
+    // Filter to visible only
+    items=items.filter(function(x){return isTrue(x.show_in_gallery);});
+    if(items.length<=MAX)return items;
+    // 1 per series (prefer featured)
+    var sm={},picked=[],used={};
+    items.forEach(function(x){var s=x.series||'_';if(!sm[s])sm[s]=[];sm[s].push(x);});
+    Object.keys(sm).forEach(function(s){
+      var a=sm[s],f=a.filter(function(x){return isTrue(x.featured);});
+      var c=f.length?f[0]:a[0];picked.push(c);used[c.image_url]=true;
+    });
+    if(picked.length<MAX){
+      var rest=items.filter(function(x){return!used[x.image_url];});
+      for(var i=rest.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=rest[i];rest[i]=rest[j];rest[j]=t;}
+      picked=picked.concat(rest.slice(0,MAX-picked.length));
+    }
+    return picked.slice(0,MAX);
+  }
+
+  /* ── Dynamic filter buttons ── */
+  function buildFilters(){
+    var tags={};
+    allItems.filter(function(x){return isTrue(x.show_in_gallery);}).forEach(function(x){
+      (x.tags||'').split(',').forEach(function(t){t=t.trim();if(t)tags[t]=true;});
+    });
+    var el=document.getElementById('galleryFilters');
+    el.innerHTML='<button class="cc-filter-btn is-active" data-filter="all">All</button>';
+    Object.keys(tags).sort().forEach(function(t){
+      el.innerHTML+='<button class="cc-filter-btn" data-filter="'+t+'">'+t+'</button>';
+    });
+  }
+
+  function initGallery(){
+    allItems=dedup(allItems);
+    // Shuffle
+    for(var i=allItems.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=allItems[i];allItems[i]=allItems[j];allItems[j]=t;}
+    buildFilters();
+    filteredItems=selectItems(allItems);
+    renderGrid();
+    bindFilters();
+  }
+
+  /* ── Balanced 3-column grid with flat bottom ── */
+  function renderGrid(){
+    if(!filteredItems.length){grid.innerHTML='<div class="cc-gallery-loading">No items yet.</div>';return;}
+
+    // Assign aspect ratios and calculate heights
+    var items=filteredItems.map(function(item,i){
+      var ar=ASPECTS[i%ASPECTS.length];
+      return {item:item,idx:i,ar:ar,h:ar.h/ar.w};
+    });
+
+    // Distribute into 3 columns by shortest-column-first
+    var cols=[[],[],[]],heights=[0,0,0];
+    items.forEach(function(x){
+      var m=0;if(heights[1]<heights[m])m=1;if(heights[2]<heights[m])m=2;
+      cols[m].push(x);heights[m]+=x.h;
+    });
+
+    // Trim tallest columns so bottom aligns (remove last item from tallest until within 5% tolerance)
+    var maxIter=10;
+    while(maxIter-->0){
+      var minH=Math.min(heights[0],heights[1],heights[2]);
+      var maxH=Math.max(heights[0],heights[1],heights[2]);
+      if(maxH-minH<0.15)break; // close enough
+      // Find tallest column with >1 item
+      var tallest=-1;
+      for(var c=0;c<3;c++){if(heights[c]===maxH&&cols[c].length>1){tallest=c;break;}}
+      if(tallest===-1)break;
+      var removed=cols[tallest].pop();
+      heights[tallest]-=removed.h;
+    }
+
+    grid.innerHTML=cols.map(function(col){
+      return '<div class="cc-gallery-col">'+col.map(function(c){
+        var url=cloudinaryTransform(c.item.image_url,'c_fill,w_'+c.ar.w+',h_'+c.ar.h+',q_auto,f_auto');
+        return '<div class="cc-gallery-item" data-index="'+c.idx+'">'+
+          '<img src="'+url+'" alt="'+(c.item.alt_text||c.item.title||'')+'" loading="lazy" style="aspect-ratio:'+c.ar.w+'/'+c.ar.h+';width:100%;object-fit:cover;">'+
+          '<div class="cc-gallery-item__overlay"><h4>'+(c.item.title||'')+'</h4><span>'+(c.item.photographer_name||'')+'</span></div>'+
+        '</div>';
+      }).join('')+'</div>';
+    }).join('');
+
+    grid.querySelectorAll('.cc-gallery-item').forEach(function(card){
+      card.addEventListener('click',function(){openLightbox(parseInt(card.getAttribute('data-index'),10));});
+    });
+  }
+
+  function bindFilters(){
+    var btns=document.querySelectorAll('.cc-filter-btn');
+    btns.forEach(function(btn){
+      btn.addEventListener('click',function(){
+        btns.forEach(function(b){b.classList.remove('is-active');});
+        btn.classList.add('is-active');
+        currentFilter=btn.getAttribute('data-filter');
+        if(currentFilter==='all'){
+          filteredItems=selectItems(allItems);
+        }else{
+          filteredItems=allItems.filter(function(x){
+            if(!isTrue(x.show_in_gallery))return false;
+            var tags=(x.tags||'').split(',').map(function(t){return t.trim();});
+            return tags.indexOf(currentFilter)!==-1;
+          }).slice(0,30);
+        }
+        grid.style.opacity='0';
+        setTimeout(function(){renderGrid();grid.style.opacity='1';},250);
+      });
+    });
+    grid.style.transition='opacity .25s ease';
+  }
+
+  /* ── Lightbox — shows ALL photos in the series (including hidden) ── */
+  function openLightbox(index){
+    var item=filteredItems[index];if(!item)return;
+    if(item.series){
+      // Pull from allItems (not filteredItems) so hidden series photos are included
+      seriesItems=allItems.filter(function(x){return x.series===item.series;});
+      seriesItems.sort(function(a,b){return(parseInt(a.sort_order)||0)-(parseInt(b.sort_order)||0);});
+      lightboxIndex=0;
+      // Find the clicked item's position in the full series
+      for(var si=0;si<seriesItems.length;si++){if(seriesItems[si].image_url===item.image_url){lightboxIndex=si;break;}}
+    }else{seriesItems=[item];lightboxIndex=0;}
+    showLB();lightbox.classList.add('is-open');document.body.style.overflow='hidden';
+  }
+  function showLB(){
+    var item=seriesItems[lightboxIndex];if(!item)return;
+    lbImg.src=cloudinaryTransform(item.image_url,'c_limit,w_1600,q_auto,f_auto');
+    lbImg.alt=item.alt_text||item.title||'';
+    lbTitle.textContent=item.title||'';
+    if(item.photographer_name){
+      lbCredit.innerHTML='Photo: '+(item.photographer_link?'<a href="'+item.photographer_link+'" target="_blank" rel="noopener">'+item.photographer_name+'</a>':item.photographer_name);
+    }else lbCredit.innerHTML='';
+    lbCounter.textContent=seriesItems.length>1?(lightboxIndex+1)+' / '+seriesItems.length:'';
+    document.getElementById('lbPrev').style.display=seriesItems.length>1?'':'none';
+    document.getElementById('lbNext').style.display=seriesItems.length>1?'':'none';
+    // Preload adjacent
+    if(seriesItems.length>1){
+      [((lightboxIndex-1+seriesItems.length)%seriesItems.length),((lightboxIndex+1)%seriesItems.length)].forEach(function(idx){
+        var img=new Image();img.src=cloudinaryTransform(seriesItems[idx].image_url,'c_limit,w_1600,q_auto,f_auto');
+      });
+    }
+  }
+  function closeLB(){lightbox.classList.remove('is-open');document.body.style.overflow='';lbImg.src='';}
+  document.getElementById('lbClose').addEventListener('click',closeLB);
+  document.getElementById('lbPrev').addEventListener('click',function(){lightboxIndex=(lightboxIndex-1+seriesItems.length)%seriesItems.length;showLB();});
+  document.getElementById('lbNext').addEventListener('click',function(){lightboxIndex=(lightboxIndex+1)%seriesItems.length;showLB();});
+  lightbox.addEventListener('click',function(e){if(e.target===lightbox||e.target.classList.contains('cc-lightbox__img-wrap'))closeLB();});
+  document.addEventListener('keydown',function(e){
+    if(!lightbox.classList.contains('is-open'))return;
+    if(e.key==='Escape')closeLB();
+    if(e.key==='ArrowLeft'){lightboxIndex=(lightboxIndex-1+seriesItems.length)%seriesItems.length;showLB();}
+    if(e.key==='ArrowRight'){lightboxIndex=(lightboxIndex+1)%seriesItems.length;showLB();}
+  });
+
+  function cloudinaryTransform(url,params){
+    if(!url)return'';
+    if(url.indexOf('/upload/')!==-1)return url.replace('/upload/','/upload/'+params+'/');
+    return url;
+  }
+})();
+</script>

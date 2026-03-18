@@ -1,0 +1,6 @@
+GRID FIX NOTES:
+- The balanced 3-column JS distributes items by estimated height
+- But the aspect ratios cycle predictably (index % 8), so each column gets similar distribution
+- Real fix: after distributing, trim the tallest column(s) so all 3 end at the same pixel height
+- OR: make the last row of each column the same aspect ratio (landscape) to even out
+- OR: use CSS Grid with explicit row spans instead of flexbox columns
