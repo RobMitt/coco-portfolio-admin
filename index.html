@@ -235,7 +235,7 @@ window.bulkDelete=async function(){
 /* ═══════════════════════════════════════════
    EDIT FORM — dirty-tracking, single pre-pop
    ═══════════════════════════════════════════ */
-var editMode='',editIdx=-1,dirtyFields=new Set();
+var editMode='',editIdx=-1,dirtyFields=new Set(),origBulkTags=new Set();
 var FF=['fSeries','fTitle','fAlt','fPhotog','fPhotogLink','fLocation','fYear','fSort','fFeatured','fShowGallery'];
 FF.forEach(function(id){var el=$('#'+id);if(!el)return;el.addEventListener('input',function(){dirtyFields.add(id);});el.addEventListener('change',function(){dirtyFields.add(id);});});
 
@@ -281,7 +281,7 @@ function openEditForSelection(){
     var showVals=new Set(selArr.map(function(i){return isTrue(data[i].show_in_gallery)?'TRUE':'FALSE';}));
     $('#fShowGallery').value=showVals.size===1?Array.from(showVals)[0]:'';
     var allTags=new Set();selArr.forEach(function(i){(data[i].tags||'').split(',').filter(Boolean).forEach(function(t){allTags.add(t.trim());});});
-    editTags=allTags;renderTags();
+    editTags=allTags;origBulkTags=new Set(allTags);renderTags();
     $('#tagModeWrap').style.display='block';$('#tagModeAdd').checked=true;
     $('#editTitle').textContent='Bulk Edit ('+selected.size+' photos)';
     $('#editSub').textContent='Shared values shown. Mixed fields say "Multiple values" — leave blank = no change.';
@@ -314,7 +314,7 @@ window.saveEdits=async function(){
       if(tagsModified){
         if($('#tagModeAdd').checked){
           var ex=new Set((item.tags||'').split(',').filter(Boolean).map(function(t){return t.trim();}));
-          editTags.forEach(function(t){ex.add(t);});row.tags=Array.from(ex).join(',');
+          editTags.forEach(function(t){ex.add(t);});origBulkTags.forEach(function(t){if(!editTags.has(t))ex.delete(t);});row.tags=Array.from(ex).join(',');
         } else {row.tags=Array.from(editTags).join(',');}
       } else {row.tags=item.tags||'';}
       row.series=dirtyFields.has('fSeries')?$('#fSeries').value:(item.series||'');
