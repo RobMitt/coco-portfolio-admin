@@ -1,1 +1,349 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Coco Cadeaux — Portfolio Manager</title><style>:root{--navy:#2F3847;--peach:#EBBA98;--blush:#F1EBEB;--gray-light:#F7F5F3;--white:#FFFFFF;}*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Montserrat',system-ui,sans-serif;background:var(--gray-light);color:var(--navy);}.sticky-top{position:sticky;top:0;z-index:100;}.topbar{background:var(--navy);color:var(--white);padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;}.topbar h1{font-size:1.1rem;font-weight:600;}.controls{background:var(--white);padding:.75rem 2rem;border-bottom:1px solid #e0ddd9;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.06);}.main{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;}.toolbar{display:none;align-items:center;gap:.5rem;flex-wrap:wrap;margin-left:auto;}.toolbar.is-active{display:flex;}.toolbar span{font-size:.8rem;color:var(--navy);font-weight:600;}.toolbar .btn--light{background:var(--blush);color:var(--navy);border:1px solid #ddd;}.btn{padding:.6rem 1.2rem;border:none;border-radius:6px;font-size:.85rem;cursor:pointer;font-family:inherit;font-weight:500;}.btn--primary{background:var(--navy);color:var(--white);}.btn--secondary{background:var(--blush);color:var(--navy);}.btn--danger{background:#c00;color:#fff;}.btn--sm{padding:.3rem .7rem;font-size:.75rem;}.series-group{margin-bottom:2rem;}.series-header{font-size:.95rem;font-weight:600;padding:.5rem 0;border-bottom:2px solid var(--peach);margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center;}.series-header span{font-size:.8rem;color:#888;font-weight:400;}.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;}.photo-card{background:var(--white);border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;cursor:pointer;transition:outline .15s;}.photo-card.selected{outline:3px solid var(--peach);}.photo-card .check{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:12px;z-index:2;color:transparent;}.photo-card.selected .check{background:var(--peach);border-color:var(--peach);color:#fff;}.photo-card img{width:100%;height:120px;object-fit:cover;}.photo-card .meta{padding:.4rem .5rem;font-size:.7rem;}.photo-card .meta .badges{display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.2rem;}.photo-card .meta .badge{font-size:.6rem;padding:1px 4px;border-radius:3px;font-weight:600;}.badge--visible{background:#d4edda;color:#155724;}.badge--hidden{background:#f8d7da;color:#721c24;}.badge--featured{background:var(--peach);color:var(--navy);}.tag-chips{display:flex;flex-wrap:wrap;gap:.35rem;}.tag-chip{display:inline-flex;padding:.25rem .6rem;border-radius:20px;font-size:.75rem;cursor:pointer;border:1px solid #ddd;background:var(--white);transition:all .15s;user-select:none;}.tag-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}.edit-form{background:var(--white);border-radius:12px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:1.5rem;display:none;}.edit-form.is-active{display:block;}.edit-form h3{margin-bottom:.25rem;font-size:1rem;}.edit-form .sub{font-size:.8rem;color:#888;margin-bottom:1rem;}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}.form-group{display:flex;flex-direction:column;gap:.25rem;}.form-group.full{grid-column:1/-1;}.form-group label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#888;}.form-group input,.form-group select{padding:.5rem .7rem;border:1px solid #ddd;border-radius:6px;font-size:.85rem;font-family:inherit;}.form-actions{grid-column:1/-1;display:flex;gap:.75rem;margin-top:.25rem;}.tag-mode{font-size:.7rem;color:#888;margin-top:.25rem;}.tag-mode label{cursor:pointer;}.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;}.toast.is-visible{transform:translateY(0);opacity:1;}@media(max-width:768px){.form-grid{grid-template-columns:1fr;}.main{padding:1rem;}}</style></head><body><div class="sticky-top">  <div class="topbar">    <h1>Coco Cadeaux — Portfolio Manager</h1>    <button class="btn btn--sm" onclick="loadGallery()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">Refresh</button>  </div>  <div class="controls">    <button class="btn btn--primary btn--sm" id="uploadBtn">&#128247; Upload Photos</button>    <div class="toolbar" id="toolbar">      <span id="selCount">0 selected</span>      <button class="btn btn--sm btn--light" onclick="selectAll()">Select All</button>      <button class="btn btn--sm btn--light" onclick="deselectAll()">Deselect</button>      <button class="btn btn--sm btn--primary" onclick="openEdit()">Edit</button>      <button class="btn btn--sm" onclick="bulkToggleGallery(true)" style="background:#d4edda;color:#155724;border:none;">Show</button>      <button class="btn btn--sm" onclick="bulkToggleGallery(false)" style="background:#f8d7da;color:#721c24;border:none;">Hide</button>      <button class="btn btn--sm btn--danger" onclick="bulkDelete()">Delete</button>      <button class="btn btn--sm" onclick="copySelectedUrls()" style="background:var(--navy);color:#fff;border:none;">Copy URLs</button>    </div>  </div></div><div class="main">  <div class="edit-form" id="editForm">    <h3 id="editTitle">Edit Details</h3>    <p class="sub" id="editSub">Update selected photos</p>    <div class="form-grid">      <div class="form-group full">        <label>Tags</label>        <div class="tag-chips" id="tagChips"></div>        <div class="tag-mode" id="tagModeWrap" style="display:none;">          <input type="checkbox" id="tagModeAdd" checked>          <label for="tagModeAdd">Add to existing tags (uncheck to replace all)</label>        </div>      </div>      <div class="form-group"><label>Series / Event</label><input type="text" id="fSeries"></div>      <div class="form-group"><label>Title</label><input type="text" id="fTitle"></div>      <div class="form-group full"><label>Alt Text</label><input type="text" id="fAlt"></div>      <div class="form-group"><label>Photographer</label><input type="text" id="fPhotog"></div>      <div class="form-group"><label>Photographer Link</label><input type="url" id="fPhotogLink"></div>      <div class="form-group"><label>Location</label><input type="text" id="fLocation"></div>      <div class="form-group"><label>Year</label><input type="number" id="fYear"></div>      <div class="form-group"><label>Sort Order</label><input type="number" id="fSort"></div>      <div class="form-group"><label>Featured?</label>        <select id="fFeatured"><option value="">— no change —</option><option value="FALSE">No</option><option value="TRUE">Yes</option></select>      </div>      <div class="form-group"><label>Show in Gallery?</label>        <select id="fShowGallery"><option value="">— no change —</option><option value="FALSE">No — hidden</option><option value="TRUE">Yes — visible</option></select>      </div>      <div class="form-actions">        <button class="btn btn--primary" id="saveBtn" onclick="saveEdits()">Save Changes</button>        <button class="btn btn--secondary" onclick="closeEdit()">Cancel</button>      </div>    </div>  </div>  <div id="galleryContainer"></div></div><div class="toast" id="toast"></div><script>var CONFIG={cloudName:'dyxhnihhi',uploadPreset:'portfolio_unsigned',folder:'portfolio',  sheetApiUrl:'https://script.google.com/macros/s/AKfycbxvQKQ3LkpozkBZjvP7H7fXNXei39nmq8EetSbs8AdI4Mgur_XIsvu_Vta_9WswNrtUbw/exec'};var TAGS=['Weddings','Catering','Charcuterie','Grazing','Corporate','Showers','Events','Florals','Tablescapes','Picnics'];var $=function(s){return document.querySelector(s);};/* Toast */function toast(msg){var el=$('#toast');el.textContent=msg;el.classList.add('is-visible');setTimeout(function(){el.classList.remove('is-visible');},3000);}/* Tags */var editTags=new Set(),tagsModified=false;function renderTags(){  $('#tagChips').innerHTML=TAGS.map(function(t){return '<span class="tag-chip '+(editTags.has(t)?'active':'')+'" onclick="toggleTag(\''+t+'\')">'+t+'</span>';}).join('');}window.toggleTag=function(t){if(editTags.has(t))editTags.delete(t);else editTags.add(t);tagsModified=true;renderTags();};renderTags();/* Cloudinary Upload */var cld=document.createElement('script');cld.src='https://upload-widget.cloudinary.com/latest/global/all.js';document.head.appendChild(cld);function makeBatchName(){var d=new Date(),p=function(n){return String(n).padStart(2,'0');};return'batch-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes());}$('#uploadBtn').addEventListener('click',function(){  if(typeof cloudinary==='undefined'){toast('Widget loading, try again...');return;}  var bs=makeBatchName(),uc=0;  var w=cloudinary.createUploadWidget({cloudName:CONFIG.cloudName,uploadPreset:CONFIG.uploadPreset,folder:CONFIG.folder,    sources:['local','camera'],multiple:true,maxFileSize:15000000,clientAllowedFormats:['jpg','jpeg','png','webp'],    showAdvancedOptions:false,cropping:false,showPoweredBy:false,    styles:{palette:{window:'#FFF',windowBorder:'#2F3847',tabIcon:'#2F3847',menuIcons:'#2F3847',textDark:'#2F3847',textLight:'#FFF',link:'#EBBA98',action:'#EBBA98',inactiveTabIcon:'#999',error:'#C00',inProgress:'#EBBA98',complete:'#2F3847',sourceBg:'#F7F5F3'}}  },function(err,result){    if(err){toast('Upload error');return;}    if(result.event==='success'){uc++;var info=result.info;      fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},        body:JSON.stringify({action:'add',data:{image_url:info.secure_url,tags:'',series:bs,title:'',alt_text:'',photographer_name:'',photographer_link:'',location:'',year:new Date().getFullYear().toString(),featured:'FALSE',sort_order:String(uc),show_in_gallery:'FALSE'}})      }).then(function(r){return r.json();}).then(function(j){        if(j.status==='ok')toast(uc+' photo(s) uploaded → '+bs);else toast('Save error');      }).catch(function(e){toast('Save error');});    }    if(result.event==='close')loadGallery();  });w.open();});/* Data */var data=[],selected=new Set();function isTrue(v){return v===true||v==='TRUE'||v==='true';}async function loadGallery(){  selected.clear();  try{var r=await fetch(CONFIG.sheetApiUrl+'?action=get');var j=await r.json();data=j.status==='ok'?(j.data||[]):[];}catch(e){data=[];}  render();}function render(){  var groups={},unsorted=[];  data.forEach(function(item,i){item._idx=i;var s=item.series||'';if(!s){unsorted.push(item);return;}if(!groups[s])groups[s]=[];groups[s].push(item);});  Object.values(groups).forEach(function(g){g.sort(function(a,b){return(parseInt(a.sort_order)||0)-(parseInt(b.sort_order)||0);});});  var html='';  if(unsorted.length)html+=renderGroup('Untagged / No Series',unsorted);  Object.keys(groups).sort().forEach(function(k){html+=renderGroup(k,groups[k]);});  if(!data.length)html='<p style="color:#888;text-align:center;padding:2rem;">No photos yet. Upload some!</p>';  $('#galleryContainer').innerHTML=html;  updateToolbar();}function renderGroup(name,items){  var vc=items.filter(function(x){return isTrue(x.show_in_gallery);}).length;  var en=name.replace(/'/g,"\\'");  return '<div class="series-group"><div class="series-header">'+name+' <span>'+items.length+' photos &bull; '+vc+' visible</span> <button class="btn btn--sm btn--secondary" onclick="event.stopPropagation();selectSeries(\''+en+'\')" style="font-size:.7rem;padding:2px 8px;">Select All in Series</button></div><div class="photo-grid">'+items.map(function(item){    var i=item._idx,sel=selected.has(i),vis=isTrue(item.show_in_gallery),feat=isTrue(item.featured);    var tags=(item.tags||'').split(',').filter(Boolean);    return '<div class="photo-card '+(sel?'selected':'')+'" onclick="toggle('+i+')" ondblclick="event.stopPropagation();editSingle('+i+')"><div class="check">'+(sel?'&#10003;':'')+'</div><img src="'+thumb(item.image_url,320,240)+'" loading="lazy"><div class="meta"><div style="font-weight:500;">'+(item.title||'Untitled')+'</div><div class="badges">'+tags.map(function(t){return '<span class="badge" style="background:var(--blush);">'+t.trim()+'</span>';}).join('')+'<span class="badge '+(vis?'badge--visible':'badge--hidden')+'">'+(vis?'Visible':'Hidden')+'</span>'+(feat?'<span class="badge badge--featured">Featured</span>':'')+'</div><button onclick="event.stopPropagation();copyUrl('+i+')" style="margin-top:4px;padding:2px 6px;font-size:.65rem;background:var(--navy);color:#fff;border:none;border-radius:3px;cursor:pointer;">Copy URL</button></div></div>';  }).join('')+'</div></div>';}function thumb(url,w,h){return(url||'').replace('/upload/','/upload/c_fill,w_'+w+',h_'+h+',q_auto,f_auto/');}/* Copy */window.copyUrl=function(i){navigator.clipboard.writeText(data[i]?.image_url||'').then(function(){toast('URL copied!');});};window.copySelectedUrls=function(){if(!selected.size){toast('Select photos first');return;}var u=Array.from(selected).map(function(i){return data[i]?.image_url||'';}).filter(Boolean).join('\n');navigator.clipboard.writeText(u).then(function(){toast(selected.size+' URL(s) copied!');});};/* Selection */window.toggle=function(i){if(selected.has(i))selected.delete(i);else selected.add(i);render();};window.selectAll=function(){data.forEach(function(_,i){selected.add(i);});render();};window.selectSeries=function(name){data.forEach(function(item,i){if((item.series||'')===(name==='Untagged / No Series'?'':name))selected.add(i);});render();};window.deselectAll=function(){selected.clear();render();};function updateToolbar(){var tb=$('#toolbar');if(data.length){tb.classList.add('is-active');$('#selCount').textContent=selected.size+' selected';}else tb.classList.remove('is-active');}/* Quick Show/Hide */window.bulkToggleGallery=async function(show){  if(!selected.size){toast('Select photos first');return;}  var total=selected.size;toast('Updating '+total+'...');  for(var idx of selected){data[idx].show_in_gallery=show?'TRUE':'FALSE';}render();  var count=0,promises=[];  for(var idx of selected){var item=data[idx];    var row={image_url:item.image_url,tags:item.tags||'',series:item.series||'',title:item.title||'',alt_text:item.alt_text||'',photographer_name:item.photographer_name||'',photographer_link:item.photographer_link||'',location:item.location||'',year:item.year||'',featured:isTrue(item.featured)?'TRUE':'FALSE',sort_order:item.sort_order||'1',show_in_gallery:show?'TRUE':'FALSE'};    promises.push(fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})}).then(function(r){return r.json();}).then(function(j){if(j.status==='ok')count++;}).catch(function(){}));  }  await Promise.all(promises);toast(count+'/'+total+(show?' shown':' hidden'));selected.clear();loadGallery();};/* Cloudinary public_id from URL */function getPublicId(url){if(!url)return null;var m=url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.\w+)?$/);return m?m[1]:null;}/* Delete (sheet + Cloudinary) */window.bulkDelete=async function(){  if(!selected.size){toast('Select photos first');return;}  if(!confirm('Delete '+selected.size+' photo(s)? Removes from sheet AND Cloudinary.'))return;  var total=selected.size,count=0;toast('Deleting '+total+'...');  var indices=Array.from(selected).sort(function(a,b){return b-a;});  for(var idx of indices){    try{      var pid=getPublicId(data[idx].image_url);      var r=await fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete',rowIndex:idx+2})});      var j=await r.json();if(j.status==='ok')count++;      if(pid){fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete_cloudinary',public_id:pid})}).catch(function(){});}    }catch(e){}  }  toast('Deleted '+count+'/'+total);selected.clear();loadGallery();};/* ═══════════════════════════════════════════   EDIT FORM — dirty-tracking, single pre-pop   ═══════════════════════════════════════════ */var editMode='',editIdx=-1,dirtyFields=new Set();var FF=['fSeries','fTitle','fAlt','fPhotog','fPhotogLink','fLocation','fYear','fSort','fFeatured','fShowGallery'];FF.forEach(function(id){var el=$('#'+id);if(!el)return;el.addEventListener('input',function(){dirtyFields.add(id);});el.addEventListener('change',function(){dirtyFields.add(id);});});/* Double-click photo → edit single */window.editSingle=function(i){selected.clear();selected.add(i);render();openEditForSelection();};/* Toolbar Edit button */window.openEdit=function(){if(!selected.size){toast('Select photos first');return;}openEditForSelection();};function openEditForSelection(){  dirtyFields=new Set();tagsModified=false;  if(selected.size===1){    /* SINGLE — populate all fields with current values */    editMode='single';editIdx=Array.from(selected)[0];    var item=data[editIdx];    editTags=new Set((item.tags||'').split(',').filter(Boolean).map(function(t){return t.trim();}));    renderTags();$('#tagModeWrap').style.display='none';    $('#fSeries').value=item.series||'';$('#fSeries').placeholder='e.g. anderson-wedding';    $('#fTitle').value=item.title||'';$('#fTitle').placeholder='e.g. The Anderson Wedding';    $('#fAlt').value=item.alt_text||'';$('#fAlt').placeholder='Describe the image';    $('#fPhotog').value=item.photographer_name||'';$('#fPhotog').placeholder='e.g. Sarah James Photography';    $('#fPhotogLink').value=item.photographer_link||'';$('#fPhotogLink').placeholder='https://...';    $('#fLocation').value=item.location||'';$('#fLocation').placeholder='e.g. Oak Hill Estate, Franklin TN';    $('#fYear').value=item.year||'';$('#fYear').placeholder='2026';    $('#fSort').value=item.sort_order||'';$('#fSort').placeholder='1';    $('#fFeatured').value=isTrue(item.featured)?'TRUE':'FALSE';    $('#fShowGallery').value=isTrue(item.show_in_gallery)?'TRUE':'FALSE';    $('#editTitle').textContent='Edit: '+(item.title||'Untitled');    $('#editSub').textContent='All fields save. Change what you need.';  } else {    /* BULK — blank form, only dirty fields get saved */    editMode='bulk';editTags=new Set();renderTags();    $('#tagModeWrap').style.display='block';$('#tagModeAdd').checked=true;    ['fSeries','fTitle','fAlt','fPhotog','fPhotogLink','fLocation','fYear','fSort'].forEach(function(id){$('#'+id).value='';$('#'+id).placeholder='— leave blank = no change —';});    $('#fFeatured').value='';$('#fShowGallery').value='';    $('#editTitle').textContent='Bulk Edit ('+selected.size+' photos)';    $('#editSub').textContent='Only fields you fill in will update. Blank = no change.';  }  $('#editForm').classList.add('is-active');  window.scrollTo({top:$('#editForm').offsetTop-20,behavior:'smooth'});}window.closeEdit=function(){$('#editForm').classList.remove('is-active');editMode='';};window.saveEdits=async function(){  var indices=editMode==='single'?[editIdx]:Array.from(selected);  var total=indices.length;  $('#saveBtn').disabled=true;$('#saveBtn').textContent='Saving '+total+'...';  var count=0,promises=[],syncPromises=[];  for(var k=0;k<indices.length;k++){    var idx=indices[k],item=data[idx],row={image_url:item.image_url};    if(editMode==='single'){      row.tags=Array.from(editTags).join(',');      row.series=$('#fSeries').value;row.title=$('#fTitle').value;      row.alt_text=$('#fAlt').value;row.photographer_name=$('#fPhotog').value;      row.photographer_link=$('#fPhotogLink').value;row.location=$('#fLocation').value;      row.year=$('#fYear').value;row.sort_order=$('#fSort').value||'1';      row.featured=$('#fFeatured').value||'FALSE';      row.show_in_gallery=$('#fShowGallery').value||(isTrue(item.show_in_gallery)?'TRUE':'FALSE');    } else {      /* BULK — only overwrite dirty fields */      if(tagsModified){        if($('#tagModeAdd').checked){          var ex=new Set((item.tags||'').split(',').filter(Boolean).map(function(t){return t.trim();}));          editTags.forEach(function(t){ex.add(t);});row.tags=Array.from(ex).join(',');        } else {row.tags=Array.from(editTags).join(',');}      } else {row.tags=item.tags||'';}      row.series=dirtyFields.has('fSeries')?$('#fSeries').value:(item.series||'');      row.title=dirtyFields.has('fTitle')?$('#fTitle').value:(item.title||'');      row.alt_text=dirtyFields.has('fAlt')?$('#fAlt').value:(item.alt_text||'');      row.photographer_name=dirtyFields.has('fPhotog')?$('#fPhotog').value:(item.photographer_name||'');      row.photographer_link=dirtyFields.has('fPhotogLink')?$('#fPhotogLink').value:(item.photographer_link||'');      row.location=dirtyFields.has('fLocation')?$('#fLocation').value:(item.location||'');      row.year=dirtyFields.has('fYear')?$('#fYear').value:(item.year||'');      row.sort_order=dirtyFields.has('fSort')?($('#fSort').value||'1'):(item.sort_order||'1');      row.featured=$('#fFeatured').value!==''?$('#fFeatured').value:(isTrue(item.featured)?'TRUE':'FALSE');      row.show_in_gallery=$('#fShowGallery').value!==''?$('#fShowGallery').value:(isTrue(item.show_in_gallery)?'TRUE':'FALSE');    }    promises.push(fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})}).then(function(r){return r.json();}).then(function(j){if(j.status==='ok')count++;}).catch(function(){}));    /* Sync metadata to Cloudinary (best-effort, fire-and-forget) */    var pid=getPublicId(item.image_url);    if(pid){syncPromises.push(fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'sync_cloudinary',public_id:pid,metadata:{alt_text:row.alt_text||'',title:row.title||'',tags:row.tags||''}})}).catch(function(){}));}  }  await Promise.all(promises);  Promise.all(syncPromises).catch(function(){});  toast('Updated '+count+'/'+total+' photo(s)');  $('#saveBtn').disabled=false;$('#saveBtn').textContent='Save Changes';  closeEdit();selected.clear();loadGallery();};loadGallery();</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coco Cadeaux — Portfolio Manager</title>
+<style>
+:root{--navy:#2F3847;--peach:#EBBA98;--blush:#F1EBEB;--gray-light:#F7F5F3;--white:#FFFFFF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Montserrat',system-ui,sans-serif;background:var(--gray-light);color:var(--navy);}
+.sticky-top{position:sticky;top:0;z-index:100;}
+.topbar{background:var(--navy);color:var(--white);padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+.topbar h1{font-size:1.1rem;font-weight:600;}
+.controls{background:var(--white);padding:.75rem 2rem;border-bottom:1px solid #e0ddd9;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.main{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;}
+.toolbar{display:none;align-items:center;gap:.5rem;flex-wrap:wrap;margin-left:auto;}
+.toolbar.is-active{display:flex;}
+.toolbar span{font-size:.8rem;color:var(--navy);font-weight:600;}
+.toolbar .btn--light{background:var(--blush);color:var(--navy);border:1px solid #ddd;}
+.btn{padding:.6rem 1.2rem;border:none;border-radius:6px;font-size:.85rem;cursor:pointer;font-family:inherit;font-weight:500;}
+.btn--primary{background:var(--navy);color:var(--white);}
+.btn--secondary{background:var(--blush);color:var(--navy);}
+.btn--danger{background:#c00;color:#fff;}
+.btn--sm{padding:.3rem .7rem;font-size:.75rem;}
+.series-group{margin-bottom:2rem;}
+.series-header{font-size:.95rem;font-weight:600;padding:.5rem 0;border-bottom:2px solid var(--peach);margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center;}
+.series-header span{font-size:.8rem;color:#888;font-weight:400;}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;}
+.photo-card{background:var(--white);border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;cursor:pointer;transition:outline .15s;}
+.photo-card.selected{outline:3px solid var(--peach);}
+.photo-card .check{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:12px;z-index:2;color:transparent;}
+.photo-card.selected .check{background:var(--peach);border-color:var(--peach);color:#fff;}
+.photo-card img{width:100%;height:120px;object-fit:cover;}
+.photo-card .meta{padding:.4rem .5rem;font-size:.7rem;}
+.photo-card .meta .badges{display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.2rem;}
+.photo-card .meta .badge{font-size:.6rem;padding:1px 4px;border-radius:3px;font-weight:600;}
+.badge--visible{background:#d4edda;color:#155724;}
+.badge--hidden{background:#f8d7da;color:#721c24;}
+.badge--featured{background:var(--peach);color:var(--navy);}
+.tag-chips{display:flex;flex-wrap:wrap;gap:.35rem;}
+.tag-chip{display:inline-flex;padding:.25rem .6rem;border-radius:20px;font-size:.75rem;cursor:pointer;border:1px solid #ddd;background:var(--white);transition:all .15s;user-select:none;}
+.tag-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.edit-form{background:var(--white);border-radius:12px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:1.5rem;display:none;}
+.edit-form.is-active{display:block;}
+.edit-form h3{margin-bottom:.25rem;font-size:1rem;}
+.edit-form .sub{font-size:.8rem;color:#888;margin-bottom:1rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.form-group{display:flex;flex-direction:column;gap:.25rem;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#888;}
+.form-group input,.form-group select{padding:.5rem .7rem;border:1px solid #ddd;border-radius:6px;font-size:.85rem;font-family:inherit;}
+.form-actions{grid-column:1/-1;display:flex;gap:.75rem;margin-top:.25rem;}
+.tag-mode{font-size:.7rem;color:#888;margin-top:.25rem;}
+.tag-mode label{cursor:pointer;}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;}
+.toast.is-visible{transform:translateY(0);opacity:1;}
+@media(max-width:768px){.form-grid{grid-template-columns:1fr;}.main{padding:1rem;}}
+</style>
+</head>
+<body>
+<div class="sticky-top">
+  <div class="topbar">
+    <h1>Coco Cadeaux — Portfolio Manager</h1>
+    <button class="btn btn--sm" onclick="loadGallery()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">Refresh</button>
+  </div>
+  <div class="controls">
+    <button class="btn btn--primary btn--sm" id="uploadBtn">&#128247; Upload Photos</button>
+    <div class="toolbar" id="toolbar">
+      <span id="selCount">0 selected</span>
+      <button class="btn btn--sm btn--light" onclick="selectAll()">Select All</button>
+      <button class="btn btn--sm btn--light" onclick="deselectAll()">Deselect</button>
+      <button class="btn btn--sm btn--primary" onclick="openEdit()">Edit</button>
+      <button class="btn btn--sm" onclick="bulkToggleGallery(true)" style="background:#d4edda;color:#155724;border:none;">Show</button>
+      <button class="btn btn--sm" onclick="bulkToggleGallery(false)" style="background:#f8d7da;color:#721c24;border:none;">Hide</button>
+      <button class="btn btn--sm btn--danger" onclick="bulkDelete()">Delete</button>
+      <button class="btn btn--sm" onclick="copySelectedUrls()" style="background:var(--navy);color:#fff;border:none;">Copy URLs</button>
+    </div>
+  </div>
+</div>
+<div class="main">
+  <div class="edit-form" id="editForm">
+    <h3 id="editTitle">Edit Details</h3>
+    <p class="sub" id="editSub">Update selected photos</p>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Tags</label>
+        <div class="tag-chips" id="tagChips"></div>
+        <div class="tag-mode" id="tagModeWrap" style="display:none;">
+          <input type="checkbox" id="tagModeAdd" checked>
+          <label for="tagModeAdd">Add to existing tags (uncheck to replace all)</label>
+        </div>
+      </div>
+      <div class="form-group"><label>Series / Event</label><input type="text" id="fSeries"></div>
+      <div class="form-group"><label>Title</label><input type="text" id="fTitle"></div>
+      <div class="form-group full"><label>Alt Text</label><input type="text" id="fAlt"></div>
+      <div class="form-group"><label>Photographer</label><input type="text" id="fPhotog"></div>
+      <div class="form-group"><label>Photographer Link</label><input type="url" id="fPhotogLink"></div>
+      <div class="form-group"><label>Location</label><input type="text" id="fLocation"></div>
+      <div class="form-group"><label>Year</label><input type="number" id="fYear"></div>
+      <div class="form-group"><label>Sort Order</label><input type="number" id="fSort"></div>
+      <div class="form-group"><label>Featured?</label>
+        <select id="fFeatured"><option value="">— no change —</option><option value="FALSE">No</option><option value="TRUE">Yes</option></select>
+      </div>
+      <div class="form-group"><label>Show in Gallery?</label>
+        <select id="fShowGallery"><option value="">— no change —</option><option value="FALSE">No — hidden</option><option value="TRUE">Yes — visible</option></select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn--primary" id="saveBtn" onclick="saveEdits()">Save Changes</button>
+        <button class="btn btn--secondary" onclick="closeEdit()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div id="galleryContainer"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var CONFIG={cloudName:'dyxhnihhi',uploadPreset:'portfolio_unsigned',folder:'portfolio',
+  sheetApiUrl:'https://script.google.com/macros/s/AKfycbxvQKQ3LkpozkBZjvP7H7fXNXei39nmq8EetSbs8AdI4Mgur_XIsvu_Vta_9WswNrtUbw/exec'};
+var TAGS=['Weddings','Catering','Charcuterie','Grazing','Corporate','Showers','Events','Florals','Tablescapes','Picnics'];
+var $=function(s){return document.querySelector(s);};
+
+/* Toast */
+function toast(msg){var el=$('#toast');el.textContent=msg;el.classList.add('is-visible');setTimeout(function(){el.classList.remove('is-visible');},3000);}
+
+/* Tags */
+var editTags=new Set(),tagsModified=false;
+function renderTags(){
+  $('#tagChips').innerHTML=TAGS.map(function(t){return '<span class="tag-chip '+(editTags.has(t)?'active':'')+'" onclick="toggleTag(\''+t+'\')">'+t+'</span>';}).join('');
+}
+window.toggleTag=function(t){if(editTags.has(t))editTags.delete(t);else editTags.add(t);tagsModified=true;renderTags();};
+renderTags();
+
+/* Cloudinary Upload */
+var cld=document.createElement('script');cld.src='https://upload-widget.cloudinary.com/latest/global/all.js';document.head.appendChild(cld);
+function makeBatchName(){var d=new Date(),p=function(n){return String(n).padStart(2,'0');};return'batch-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes());}
+$('#uploadBtn').addEventListener('click',function(){
+  if(typeof cloudinary==='undefined'){toast('Widget loading, try again...');return;}
+  var bs=makeBatchName(),uc=0;
+  var w=cloudinary.createUploadWidget({cloudName:CONFIG.cloudName,uploadPreset:CONFIG.uploadPreset,folder:CONFIG.folder,
+    sources:['local','camera'],multiple:true,maxFileSize:15000000,clientAllowedFormats:['jpg','jpeg','png','webp'],
+    showAdvancedOptions:false,cropping:false,showPoweredBy:false,
+    styles:{palette:{window:'#FFF',windowBorder:'#2F3847',tabIcon:'#2F3847',menuIcons:'#2F3847',textDark:'#2F3847',textLight:'#FFF',link:'#EBBA98',action:'#EBBA98',inactiveTabIcon:'#999',error:'#C00',inProgress:'#EBBA98',complete:'#2F3847',sourceBg:'#F7F5F3'}}
+  },function(err,result){
+    if(err){toast('Upload error');return;}
+    if(result.event==='success'){uc++;var info=result.info;
+      fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'add',data:{image_url:info.secure_url,tags:'',series:bs,title:'',alt_text:'',photographer_name:'',photographer_link:'',location:'',year:new Date().getFullYear().toString(),featured:'FALSE',sort_order:String(uc),show_in_gallery:'FALSE'}})
+      }).then(function(r){return r.json();}).then(function(j){
+        if(j.status==='ok')toast(uc+' photo(s) uploaded → '+bs);else toast('Save error');
+      }).catch(function(e){toast('Save error');});
+    }
+    if(result.event==='close')loadGallery();
+  });w.open();
+});
+
+/* Data */
+var data=[],selected=new Set();
+function isTrue(v){return v===true||v==='TRUE'||v==='true';}
+
+async function loadGallery(){
+  selected.clear();
+  try{var r=await fetch(CONFIG.sheetApiUrl+'?action=get');var j=await r.json();data=j.status==='ok'?(j.data||[]):[];}catch(e){data=[];}
+  render();
+}
+
+function render(){
+  var groups={},unsorted=[];
+  data.forEach(function(item,i){item._idx=i;var s=item.series||'';if(!s){unsorted.push(item);return;}if(!groups[s])groups[s]=[];groups[s].push(item);});
+  Object.values(groups).forEach(function(g){g.sort(function(a,b){return(parseInt(a.sort_order)||0)-(parseInt(b.sort_order)||0);});});
+  var html='';
+  if(unsorted.length)html+=renderGroup('Untagged / No Series',unsorted);
+  Object.keys(groups).sort().forEach(function(k){html+=renderGroup(k,groups[k]);});
+  if(!data.length)html='<p style="color:#888;text-align:center;padding:2rem;">No photos yet. Upload some!</p>';
+  $('#galleryContainer').innerHTML=html;
+  updateToolbar();
+}
+
+function renderGroup(name,items){
+  var vc=items.filter(function(x){return isTrue(x.show_in_gallery);}).length;
+  var en=name.replace(/'/g,"\\'");
+  return '<div class="series-group"><div class="series-header">'+name+' <span>'+items.length+' photos &bull; '+vc+' visible</span> <button class="btn btn--sm btn--secondary" onclick="event.stopPropagation();selectSeries(\''+en+'\')" style="font-size:.7rem;padding:2px 8px;">Select All in Series</button></div><div class="photo-grid">'+items.map(function(item){
+    var i=item._idx,sel=selected.has(i),vis=isTrue(item.show_in_gallery),feat=isTrue(item.featured);
+    var tags=(item.tags||'').split(',').filter(Boolean);
+    return '<div class="photo-card '+(sel?'selected':'')+'" onclick="toggle('+i+')" ondblclick="event.stopPropagation();editSingle('+i+')"><div class="check">'+(sel?'&#10003;':'')+'</div><img src="'+thumb(item.image_url,320,240)+'" loading="lazy"><div class="meta"><div style="font-weight:500;">'+(item.title||'Untitled')+'</div><div class="badges">'+tags.map(function(t){return '<span class="badge" style="background:var(--blush);">'+t.trim()+'</span>';}).join('')+'<span class="badge '+(vis?'badge--visible':'badge--hidden')+'">'+(vis?'Visible':'Hidden')+'</span>'+(feat?'<span class="badge badge--featured">Featured</span>':'')+'</div><button onclick="event.stopPropagation();copyUrl('+i+')" style="margin-top:4px;padding:2px 6px;font-size:.65rem;background:var(--navy);color:#fff;border:none;border-radius:3px;cursor:pointer;">Copy URL</button></div></div>';
+  }).join('')+'</div></div>';
+}
+
+function thumb(url,w,h){return(url||'').replace('/upload/','/upload/c_fill,w_'+w+',h_'+h+',q_auto,f_auto/');}
+
+/* Copy */
+window.copyUrl=function(i){navigator.clipboard.writeText(data[i]?.image_url||'').then(function(){toast('URL copied!');});};
+window.copySelectedUrls=function(){if(!selected.size){toast('Select photos first');return;}var u=Array.from(selected).map(function(i){return data[i]?.image_url||'';}).filter(Boolean).join('\n');navigator.clipboard.writeText(u).then(function(){toast(selected.size+' URL(s) copied!');});};
+
+/* Selection */
+window.toggle=function(i){if(selected.has(i))selected.delete(i);else selected.add(i);render();};
+window.selectAll=function(){data.forEach(function(_,i){selected.add(i);});render();};
+window.selectSeries=function(name){data.forEach(function(item,i){if((item.series||'')===(name==='Untagged / No Series'?'':name))selected.add(i);});render();};
+window.deselectAll=function(){selected.clear();render();};
+function updateToolbar(){var tb=$('#toolbar');if(data.length){tb.classList.add('is-active');$('#selCount').textContent=selected.size+' selected';}else tb.classList.remove('is-active');}
+
+/* Quick Show/Hide */
+window.bulkToggleGallery=async function(show){
+  if(!selected.size){toast('Select photos first');return;}
+  var total=selected.size;toast('Updating '+total+'...');
+  for(var idx of selected){data[idx].show_in_gallery=show?'TRUE':'FALSE';}render();
+  var count=0,promises=[];
+  for(var idx of selected){var item=data[idx];
+    var row={image_url:item.image_url,tags:item.tags||'',series:item.series||'',title:item.title||'',alt_text:item.alt_text||'',photographer_name:item.photographer_name||'',photographer_link:item.photographer_link||'',location:item.location||'',year:item.year||'',featured:isTrue(item.featured)?'TRUE':'FALSE',sort_order:item.sort_order||'1',show_in_gallery:show?'TRUE':'FALSE'};
+    promises.push(fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})}).then(function(r){return r.json();}).then(function(j){if(j.status==='ok')count++;}).catch(function(){}));
+  }
+  await Promise.all(promises);toast(count+'/'+total+(show?' shown':' hidden'));selected.clear();loadGallery();
+};
+
+/* Cloudinary public_id from URL */
+function getPublicId(url){if(!url)return null;var m=url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.\w+)?$/);return m?m[1]:null;}
+
+/* Delete (sheet + Cloudinary) */
+window.bulkDelete=async function(){
+  if(!selected.size){toast('Select photos first');return;}
+  if(!confirm('Delete '+selected.size+' photo(s)? Removes from sheet AND Cloudinary.'))return;
+  var total=selected.size,count=0;toast('Deleting '+total+'...');
+  var indices=Array.from(selected).sort(function(a,b){return b-a;});
+  for(var idx of indices){
+    try{
+      var pid=getPublicId(data[idx].image_url);
+      var r=await fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete',rowIndex:idx+2})});
+      var j=await r.json();if(j.status==='ok')count++;
+      if(pid){fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete_cloudinary',public_id:pid})}).catch(function(){});}
+    }catch(e){}
+  }
+  toast('Deleted '+count+'/'+total);selected.clear();loadGallery();
+};
+
+/* ═══════════════════════════════════════════
+   EDIT FORM — dirty-tracking, single pre-pop
+   ═══════════════════════════════════════════ */
+var editMode='',editIdx=-1,dirtyFields=new Set();
+var FF=['fSeries','fTitle','fAlt','fPhotog','fPhotogLink','fLocation','fYear','fSort','fFeatured','fShowGallery'];
+FF.forEach(function(id){var el=$('#'+id);if(!el)return;el.addEventListener('input',function(){dirtyFields.add(id);});el.addEventListener('change',function(){dirtyFields.add(id);});});
+
+/* Double-click photo → edit single */
+window.editSingle=function(i){selected.clear();selected.add(i);render();openEditForSelection();};
+/* Toolbar Edit button */
+window.openEdit=function(){if(!selected.size){toast('Select photos first');return;}openEditForSelection();};
+
+function openEditForSelection(){
+  dirtyFields=new Set();tagsModified=false;
+
+  if(selected.size===1){
+    /* SINGLE — populate all fields with current values */
+    editMode='single';editIdx=Array.from(selected)[0];
+    var item=data[editIdx];
+    editTags=new Set((item.tags||'').split(',').filter(Boolean).map(function(t){return t.trim();}));
+    renderTags();$('#tagModeWrap').style.display='none';
+    $('#fSeries').value=item.series||'';$('#fSeries').placeholder='e.g. anderson-wedding';
+    $('#fTitle').value=item.title||'';$('#fTitle').placeholder='e.g. The Anderson Wedding';
+    $('#fAlt').value=item.alt_text||'';$('#fAlt').placeholder='Describe the image';
+    $('#fPhotog').value=item.photographer_name||'';$('#fPhotog').placeholder='e.g. Sarah James Photography';
+    $('#fPhotogLink').value=item.photographer_link||'';$('#fPhotogLink').placeholder='https://...';
+    $('#fLocation').value=item.location||'';$('#fLocation').placeholder='e.g. Oak Hill Estate, Franklin TN';
+    $('#fYear').value=item.year||'';$('#fYear').placeholder='2026';
+    $('#fSort').value=item.sort_order||'';$('#fSort').placeholder='1';
+    $('#fFeatured').value=isTrue(item.featured)?'TRUE':'FALSE';
+    $('#fShowGallery').value=isTrue(item.show_in_gallery)?'TRUE':'FALSE';
+    $('#editTitle').textContent='Edit: '+(item.title||'Untitled');
+    $('#editSub').textContent='All fields save. Change what you need.';
+  } else {
+    /* BULK — pre-populate shared values, show placeholder for mixed */
+    editMode='bulk';
+    var selArr=Array.from(selected);
+    var fieldMap={fSeries:'series',fTitle:'title',fAlt:'alt_text',fPhotog:'photographer_name',fPhotogLink:'photographer_link',fLocation:'location',fYear:'year',fSort:'sort_order'};
+    Object.keys(fieldMap).forEach(function(fId){
+      var prop=fieldMap[fId];
+      var vals=new Set(selArr.map(function(i){return data[i][prop]||'';}));
+      if(vals.size===1){var v=Array.from(vals)[0];$('#'+fId).value=v;$('#'+fId).placeholder=v?'':'— leave blank = no change —';}
+      else{$('#'+fId).value='';$('#'+fId).placeholder='Multiple values';}
+    });
+    var featVals=new Set(selArr.map(function(i){return isTrue(data[i].featured)?'TRUE':'FALSE';}));
+    $('#fFeatured').value=featVals.size===1?Array.from(featVals)[0]:'';
+    var showVals=new Set(selArr.map(function(i){return isTrue(data[i].show_in_gallery)?'TRUE':'FALSE';}));
+    $('#fShowGallery').value=showVals.size===1?Array.from(showVals)[0]:'';
+    var allTags=new Set();selArr.forEach(function(i){(data[i].tags||'').split(',').filter(Boolean).forEach(function(t){allTags.add(t.trim());});});
+    editTags=allTags;renderTags();
+    $('#tagModeWrap').style.display='block';$('#tagModeAdd').checked=true;
+    $('#editTitle').textContent='Bulk Edit ('+selected.size+' photos)';
+    $('#editSub').textContent='Shared values shown. Mixed fields say "Multiple values" — leave blank = no change.';
+  }
+  $('#editForm').classList.add('is-active');
+  window.scrollTo({top:$('#editForm').offsetTop-20,behavior:'smooth'});
+}
+
+window.closeEdit=function(){$('#editForm').classList.remove('is-active');editMode='';};
+
+window.saveEdits=async function(){
+  var indices=editMode==='single'?[editIdx]:Array.from(selected);
+  var total=indices.length;
+  $('#saveBtn').disabled=true;$('#saveBtn').textContent='Saving '+total+'...';
+  var count=0,promises=[],syncPromises=[];
+
+  for(var k=0;k<indices.length;k++){
+    var idx=indices[k],item=data[idx],row={image_url:item.image_url};
+
+    if(editMode==='single'){
+      row.tags=Array.from(editTags).join(',');
+      row.series=$('#fSeries').value;row.title=$('#fTitle').value;
+      row.alt_text=$('#fAlt').value;row.photographer_name=$('#fPhotog').value;
+      row.photographer_link=$('#fPhotogLink').value;row.location=$('#fLocation').value;
+      row.year=$('#fYear').value;row.sort_order=$('#fSort').value||'1';
+      row.featured=$('#fFeatured').value||'FALSE';
+      row.show_in_gallery=$('#fShowGallery').value||(isTrue(item.show_in_gallery)?'TRUE':'FALSE');
+    } else {
+      /* BULK — only overwrite dirty fields */
+      if(tagsModified){
+        if($('#tagModeAdd').checked){
+          var ex=new Set((item.tags||'').split(',').filter(Boolean).map(function(t){return t.trim();}));
+          editTags.forEach(function(t){ex.add(t);});row.tags=Array.from(ex).join(',');
+        } else {row.tags=Array.from(editTags).join(',');}
+      } else {row.tags=item.tags||'';}
+      row.series=dirtyFields.has('fSeries')?$('#fSeries').value:(item.series||'');
+      row.title=dirtyFields.has('fTitle')?$('#fTitle').value:(item.title||'');
+      row.alt_text=dirtyFields.has('fAlt')?$('#fAlt').value:(item.alt_text||'');
+      row.photographer_name=dirtyFields.has('fPhotog')?$('#fPhotog').value:(item.photographer_name||'');
+      row.photographer_link=dirtyFields.has('fPhotogLink')?$('#fPhotogLink').value:(item.photographer_link||'');
+      row.location=dirtyFields.has('fLocation')?$('#fLocation').value:(item.location||'');
+      row.year=dirtyFields.has('fYear')?$('#fYear').value:(item.year||'');
+      row.sort_order=dirtyFields.has('fSort')?($('#fSort').value||'1'):(item.sort_order||'1');
+      row.featured=$('#fFeatured').value!==''?$('#fFeatured').value:(isTrue(item.featured)?'TRUE':'FALSE');
+      row.show_in_gallery=$('#fShowGallery').value!==''?$('#fShowGallery').value:(isTrue(item.show_in_gallery)?'TRUE':'FALSE');
+    }
+
+    promises.push(fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',rowIndex:idx+2,data:row})}).then(function(r){return r.json();}).then(function(j){if(j.status==='ok')count++;}).catch(function(){}));
+
+    /* Sync metadata to Cloudinary (best-effort, fire-and-forget) */
+    var pid=getPublicId(item.image_url);
+    if(pid){syncPromises.push(fetch(CONFIG.sheetApiUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'sync_cloudinary',public_id:pid,metadata:{alt_text:row.alt_text||'',title:row.title||'',tags:row.tags||''}})}).catch(function(){}));}
+  }
+
+  await Promise.all(promises);
+  Promise.all(syncPromises).catch(function(){});
+  toast('Updated '+count+'/'+total+' photo(s)');
+  $('#saveBtn').disabled=false;$('#saveBtn').textContent='Save Changes';
+  closeEdit();selected.clear();loadGallery();
+};
+
+loadGallery();
+</script>
+</body>
+</html>
